@@ -1,0 +1,194 @@
+/* Banner Section */
+.banner {
+    padding: 80px 0;
+    background: linear-gradient(135deg, #f6f9fc 0%, #f1f4f8 100%);
+    
+}
+
+.banner h1 {
+    font-size: 2.5rem;
+    font-weight: 700;
+    color: #2d3436;
+    margin-bottom: 1.5rem;
+}
+
+.banner p {
+    font-size: 1.2rem;
+    color: #636e72;
+    margin-bottom: 2rem;
+}
+
+/* Search Form */
+.search-form {
+    background: white;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+}
+
+.search-form h3 {
+    color: #2d3436;
+    font-size: 1.5rem;
+    margin-bottom: 1.5rem;
+}
+
+.search-form .form-group {
+    position: relative;
+}
+
+.search-form .form-control {
+    padding: 0.75rem 1rem;
+    font-size: 1rem;
+    border: 1px solid #e1e8ed;
+    border-radius: 5px;
+}
+
+.search-form button {
+    margin-top: 1rem;
+    width: 100%;
+    padding: 0.75rem;
+}
+
+/* Specialties Section */
+.specialties {
+    padding: 80px 0;
+    background-color: #fff;
+}
+
+.specialty-card {
+    background: #fff;
+    padding: 2rem;
+    border-radius: 10px;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    text-align: center;
+    transition: transform 0.3s ease;
+    margin-bottom: 2rem;
+}
+
+.specialty-card:hover {
+    transform: translateY(-10px);
+}
+
+.specialty-icon {
+    width: 80px;
+    height: 80px;
+    background: var(--primary-color);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto 1.5rem;
+}
+
+.specialty-icon i {
+    font-size: 2rem;
+    color: white;
+}
+
+.specialty-card h3 {
+    color: #2d3436;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+}
+
+.specialty-card p {
+    color: #636e72;
+    margin-bottom: 1.5rem;
+}
+
+/* Health News Section */
+.health-news {
+    padding: 80px 0;
+    background-color: #f8f9fa;
+}
+
+.news-card {
+    background: #fff;
+    border-radius: 10px;
+    overflow: hidden;
+    box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.1);
+    margin-bottom: 2rem;
+    transition: transform 0.3s ease;
+}
+
+.news-card:hover {
+    transform: translateY(-10px);
+}
+
+.news-image {
+    width: 100%;
+    height: 200px;
+    object-fit: cover;
+}
+
+.news-content {
+    padding: 1.5rem;
+}
+
+.news-date {
+    color: #636e72;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.news-date i {
+    margin-right: 0.5rem;
+}
+
+.news-content h3 {
+    color: #2d3436;
+    font-size: 1.25rem;
+    margin-bottom: 1rem;
+    line-height: 1.4;
+}
+
+.news-content p {
+    color: #636e72;
+    margin-bottom: 1rem;
+}
+
+.read-more {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+}
+
+.read-more i {
+    margin-left: 0.5rem;
+    transition: transform 0.3s ease;
+}
+
+.read-more:hover i {
+    transform: translateX(5px);
+}
+
+/* Responsive Styles */
+@media (max-width: 767.98px) {
+    .banner {
+        padding: 40px 0;
+        text-align: center;
+    }
+
+    .banner h1 {
+        font-size: 2rem;
+    }
+
+    .search-form {
+        margin-top: 2rem;
+    }
+
+    .section-title {
+        font-size: 1.75rem;
+        margin-bottom: 2rem;
+    }
+
+    .specialty-card {
+        margin-bottom: 1.5rem;
+    }
+
+    .news-card {
+        margin-bottom: 1.5rem;
+    }
+} 

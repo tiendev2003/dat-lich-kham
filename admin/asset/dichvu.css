@@ -1,0 +1,126 @@
+/* Admin Service Management Styles */
+.service-thumb {
+    width: 60px;
+    height: 60px;
+    object-fit: cover;
+    border-radius: 5px;
+}
+
+/* Table Styles */
+.table {
+    vertical-align: middle;
+}
+
+.table th {
+    background-color: #f8f9fa;
+    font-weight: 600;
+}
+
+.table td {
+    padding: 0.75rem;
+}
+
+/* Filter Section */
+.input-group {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+.form-select {
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.05);
+}
+
+/* Modal Styles */
+.modal-lg {
+    max-width: 800px;
+}
+
+.modal-body {
+    padding: 2rem;
+}
+
+/* Form Styles */
+.form-label {
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.form-control, .form-select {
+    padding: 0.75rem;
+    border-radius: 5px;
+    border: 1px solid #dee2e6;
+}
+
+.form-control:focus, .form-select:focus {
+    border-color: #005bac;
+    box-shadow: 0 0 0 0.2rem rgba(0, 91, 172, 0.25);
+}
+
+/* Button Styles */
+.btn-primary {
+    background-color: #005bac;
+    border-color: #005bac;
+}
+
+.btn-primary:hover {
+    background-color: #004a8c;
+    border-color: #004a8c;
+}
+
+.btn-info {
+    color: white;
+}
+
+/* Status Badge */
+.badge {
+    padding: 0.5em 0.75em;
+    font-weight: 500;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .service-management-header {
+        flex-direction: column;
+        gap: 1rem;
+    }
+    
+    .filter-section {
+        margin-top: 1rem;
+    }
+    
+    .table-responsive {
+        margin-top: 1rem;
+    }
+}
+
+/* Animation Effects */
+.modal.fade .modal-dialog {
+    transition: transform 0.3s ease-out;
+}
+
+.btn {
+    transition: all 0.2s ease;
+}
+
+/* Hover Effects */
+.table tbody tr:hover {
+    background-color: rgba(0, 91, 172, 0.05);
+}
+
+.btn:hover {
+    transform: translateY(-1px);
+}
+
+/* Form Validation Styles */
+.form-control.is-invalid {
+    border-color: #dc3545;
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 12 12' width='12' height='12' fill='none' stroke='%23dc3545'%3e%3ccircle cx='6' cy='6' r='4.5'/%3e%3cpath stroke-linejoin='round' d='M5.8 3.6h.4L6 6.5z'/%3e%3ccircle cx='6' cy='8.2' r='.6' fill='%23dc3545' stroke='none'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right calc(0.375em + 0.1875rem) center;
+    background-size: calc(0.75em + 0.375rem) calc(0.75em + 0.375rem);
+}
+
+.invalid-feedback {
+    color: #dc3545;
+    font-size: 0.875rem;
+    margin-top: 0.25rem;
+}
