@@ -40,11 +40,7 @@ Hệ thống được phát triển theo mô hình web application với các th
    - Mô tả triệu chứng
    - Xác nhận và theo dõi lịch hẹn
 
-3. **Quản lý tài khoản người dùng**
-   - Đăng ký tài khoản
-   - Đăng nhập hệ thống
-   - Cập nhật thông tin cá nhân
-   - Xem lịch sử đặt khám
+
 
 ## 3. YÊU CẦU CHỨC NĂNG CHI TIẾT
 
@@ -95,9 +91,6 @@ Hệ thống được phát triển theo mô hình web application với các th
 
 #### 3.3.1 Tổng quan hệ thống
 - Xem thống kê tổng quan (số lượng lịch hẹn, số bác sĩ, số bệnh nhân)
-- Xem biểu đồ thống kê lịch hẹn theo tháng
-- Xem biểu đồ phân bố lịch hẹn theo chuyên khoa
-
 #### 3.3.2 Quản lý bác sĩ
 - Thêm, sửa, xóa thông tin bác sĩ
 - Phân công bác sĩ theo chuyên khoa

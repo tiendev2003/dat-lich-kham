@@ -18,17 +18,43 @@ $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế c
                     <li class="nav-item">
                         <a class="nav-link" href="index.php">Trang chủ</a>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="dichvu.php">Dịch Vụ</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="dichvuDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Dịch vụ
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="dichvuDropdown">
+                            <li><a class="dropdown-item" href="dichvu.php">Tất cả dịch vụ</a></li>
+                            <li><a class="dropdown-item" href="datlich.php">Đặt lịch khám</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="bacsi.php">Bác sĩ</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="bacsiDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Bác sĩ
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="bacsiDropdown">
+                            <li><a class="dropdown-item" href="bacsi.php">Danh sách bác sĩ</a></li>
+                        </ul>
                     </li>
-                    <li class="nav-item">
-                        <a class="nav-link" href="chuyenkhoa.php">Chuyên khoa</a>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="chuyenkhoaDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Chuyên khoa
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="chuyenkhoaDropdown">
+                            <li><a class="dropdown-item" href="chuyenkhoa.php">Tất cả chuyên khoa</a></li>
+                        </ul>
                     </li>
                     <li class="nav-item">
                         <a class="nav-link" href="tintuc.php">Tin tức</a>
+                    </li>
+                    <li class="nav-item dropdown">
+                        <a class="nav-link dropdown-toggle" href="#" id="thongTinDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
+                            Thông tin
+                        </a>
+                        <ul class="dropdown-menu" aria-labelledby="thongTinDropdown">
+                            <li><a class="dropdown-item" href="about.php">Giới thiệu</a></li>
+                            <li><a class="dropdown-item" href="contact.php">Liên hệ</a></li>
+                            <li><a class="dropdown-item" href="faq.php">FAQ</a></li>
+                        </ul>
                     </li>
                 </ul>
                 <div class="nav-buttons">
@@ -38,19 +64,17 @@ $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế c
                                 <i class="fas fa-user"></i> Tài khoản
                             </button>
                             <ul class="dropdown-menu">
-                                <li><a class="dropdown-item" href="profile.php">Thông tin cá nhân</a></li>
-                                <li><a class="dropdown-item" href="appointments.php">Lịch sử đặt khám</a></li>
+                                <li><a class="dropdown-item" href="user_profile.php">Thông tin cá nhân</a></li>
+                                <li><a class="dropdown-item" href="lichsu_datlich.php">Lịch sử đặt khám</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="logout.php">Đăng xuất</a></li>
                             </ul>
                         </div>
                     <?php else: ?>
-                        <!-- Thành -->
                         <a href="dangnhap.php" class="btn btn-outline-primary me-2">Đăng nhập</a>
-                        <a href="dangky.php" class="btn btn-primary">Đăng ký</a>
-                    <?php endif; ?>
+                     <?php endif; ?>
                 </div>
             </div>
         </div>
     </nav>
-</header> 
+</header>

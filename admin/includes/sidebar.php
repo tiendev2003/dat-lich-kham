@@ -1,5 +1,5 @@
-<div class="col-md-2 sidebar">
-    <div class="d-flex flex-column p-3 text-white" style="min-height: 100vh;">
+<div class="sidebar">
+    <div class="sidebar-content d-flex flex-column p-3 text-white">
         <!-- Logo/Brand -->
         <a href="tongquan.php"
             class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
@@ -47,10 +47,16 @@
                 </a>
             </li>
             <li>
-                <a href="taikhoan.php"
-                    class="nav-link text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'taikhoan.php') ? 'active' : ''; ?>">
-                    <i class="fas fa-user-cog me-2"></i>
-                    Quản lý tài khoản
+                <a href="tintuc.php"
+                    class="nav-link text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'tintuc.php') ? 'active' : ''; ?>">
+                    <i class="fas fa-newspaper me-2"></i>
+                    Quản lý tin tức
+                </a>
+            </li>
+            <li class="nav-item">
+                <a href="caidat.php" class="nav-link text-white <?php echo (basename($_SERVER['PHP_SELF']) == 'caidat.php') ? 'active' : ''; ?>">
+                    <i class="fas fa-cog me-2"></i>
+                    Cài đặt Website
                 </a>
             </li>
         </ul>
@@ -65,7 +71,7 @@
             </a>
             <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
                 <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                <li><a class="dropdown-item" href="settings.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -76,12 +82,40 @@
     </div>
 </div>
 
+<!-- Mobile Header (Visible on small screens) -->
+<div class="mobile-header">
+    <button class="mobile-toggle" id="sidebarToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <span class="brand-text">Lộc Bình Clinic</span>
+    <div class="dropdown">
+        <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
+            id="mobileUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
+            <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle">
+        </a>
+        <ul class="dropdown-menu dropdown-menu-dark text-small shadow dropdown-menu-end"
+            aria-labelledby="mobileUserDropdown">
+            <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
+            <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+            <li>
+                <hr class="dropdown-divider">
+            </li>
+            <li><a class="dropdown-item" href="logout.php"><i class="fas fa-sign-out-alt me-2"></i>Đăng xuất</a></li>
+        </ul>
+    </div>
+</div>
+
+<!-- Overlay for sidebar on mobile -->
+<div class="sidebar-overlay" id="sidebarOverlay"></div>
+
 <style>
     .sidebar {
         background-color: #343a40;
         min-width: 250px;
-        /* Đảm bảo sidebar có đủ không gian */
+    }
 
+    .sidebar-content {
+        min-height: 100vh;
     }
 
     .nav-link {
@@ -89,11 +123,8 @@
         margin: 5px 0;
         transition: all 0.3s;
         white-space: nowrap;
-        /* Ngăn text xuống dòng */
         overflow: hidden;
-        /* Ẩn nội dung bị tràn */
         text-overflow: ellipsis;
-        /* Hiển thị dấu ... nếu text bị cắt */
         display: flex;
         align-items: center;
         padding: 10px 15px;
@@ -117,5 +148,56 @@
 
     hr {
         color: rgba(255, 255, 255, 0.3);
+    }
+
+    .mobile-header {
+        display: none;
+        background-color: #343a40;
+        color: white;
+        padding: 10px;
+        align-items: center;
+        justify-content: space-between;
+        display: flex;
+    }
+
+    .mobile-toggle {
+        background: none;
+        border: none;
+        color: white;
+        font-size: 1.5rem;
+    }
+
+    .sidebar-overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5);
+        z-index: 999;
+    }
+
+    @media (max-width: 768px) {
+        .sidebar {
+            position: fixed;
+            top: 0;
+            left: -250px;
+            height: 100%;
+            transition: left 0.3s;
+            z-index: 1000;
+        }
+
+        .sidebar.active {
+            left: 0;
+        }
+
+        .mobile-header {
+            display: flex;
+        }
+
+        .sidebar-overlay.active {
+            display: block;
+        }
     }
 </style>

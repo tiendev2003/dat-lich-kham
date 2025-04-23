@@ -1,3 +1,7 @@
+<?php
+// Start by including header.php which contains session_start()
+include 'includes/header.php'; 
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -185,8 +189,6 @@
 </head>
 <body>
     <!-- Header -->
-    <?php include 'includes/header.php'; ?>
-
     <!-- Specialty Header -->
     <section class="specialty-header">
         <div class="container">
