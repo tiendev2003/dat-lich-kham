@@ -153,7 +153,7 @@ Hệ thống được phát triển theo mô hình web application với các th
 │   ├── tongquan.php       # Trang tổng quan
 │   ├── asset/             # CSS cho admin
 │   └── includes/          # Các thành phần dùng chung
-├── docter/                # Phân hệ bác sĩ
+├── doctor/                # Phân hệ bác sĩ
 │   ├── lichkham.php       # Quản lý lịch khám
 │   ├── asset/             # CSS cho bác sĩ
 │   └── includes/          # Các thành phần dùng chung

@@ -1,7 +1,16 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Chuyên khoa';
+require_once 'includes/functions.php';
+
 // Kết nối database
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
+
+// Lấy thông số từ cài đặt
+$specialties_title = get_setting('specialties_title', 'Chuyên khoa');
+$specialties_subtitle = get_setting('specialties_subtitle', 'Các chuyên khoa khám và điều trị tại phòng khám');
+$specialties_banner = get_setting('specialties_banner_image', '');
 
 // Lấy danh sách chuyên khoa
 $sql = "SELECT * FROM chuyenkhoa ORDER BY ten_chuyenkhoa";
@@ -17,25 +26,36 @@ if ($result && $result->num_rows > 0) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Chuyên khoa - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/chuyenkhoa.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .specialties-banner {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
+                        url('<?php echo !empty($specialties_banner) ? $specialties_banner : 'assets/img/specialties-banner.jpg'; ?>');
+            background-size: cover;
+            background-position: center;
+            padding: 80px 0;
+            margin-bottom: 40px;
+            color: #fff;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner Section -->
+    <div class="specialties-banner">
+        <div class="container">
+            <h1 class="display-4"><?php echo htmlspecialchars($specialties_title); ?></h1>
+            <p class="lead"><?php echo htmlspecialchars($specialties_subtitle); ?></p>
+        </div>
+    </div>
+
     <!-- Specialties Section -->
     <section class="specialties">
         <div class="container">
-            <h1 class="page-title">Chuyên khoa</h1>
-            
             <?php if (count($specialties) > 0): ?>
             <div class="row">
                 <?php foreach ($specialties as $specialty): ?>

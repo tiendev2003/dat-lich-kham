@@ -1,0 +1,37 @@
+<?php
+// File được sinh tự động từ phần cài đặt hệ thống
+// Cập nhật lần cuối: 2025-04-24 15:35:16
+
+$settings_data = [
+    'site_name' => 'Phòng khám Lộc Bình',
+    'site_description' => 'Chăm sóc sức khỏe toàn diện',
+    'site_logo' => 'assets/img/logo.png',
+    'site_favicon' => 'assets/img/favicon.png',
+    'site_phone' => '0987 654 321',
+    'site_email' => 'info@phongkhamlocbinh.vn',
+    'site_address' => '123 Nguyễn Văn Linh, Quận 7, TP.HCM',
+    'site_working_hours' => 'Thứ 2 - Thứ 6: 7:30 - 17:00
+Thứ 7: 7:30 - 12:00
+Chủ nhật: Nghỉ',
+    'site_facebook' => 'https://facebook.com/phongkhamlocbinh',
+    'site_maps' => '<iframe src=\"https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.6288145795835!2d106.68022805804552!3d10.765789454775936!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f1b7c3ed289%3A0xa06651894598e488!2zVHLGsOG7nW5nIMSQ4bqhaSBo4buNYyBTw6BpIEfDsm4!5e0!3m2!1svi!2s!4v1680059434003!5m2!1svi!2s\" width=\"600\" height=\"450\" style=\"border:0;\" allowfullscreen=\"\" loading=\"lazy\"></iframe>',
+    'site_primary_color' => '#0d6efd',
+    'site_enable_appointment' => 1,
+    'primary_color' => '#005bac',
+    'secondary_color' => '#6c757d',
+    'accent_color' => '#28a745',
+    'font_family' => 'Roboto, sans-serif',
+    'header_bg_color' => '#ffffff',
+    'footer_bg_color' => '#f8f9fa',
+    'banner_title' => 'Đặt lịch khám trực tuyến',
+    'banner_subtitle' => 'Dễ dàng - Nhanh chóng - Tiện lợi',
+    'banner_image' => 'assets/img/banner.jpg',
+    'site_twitter' => 'https://twitter.com/phongkhamlocbinh',
+    'site_instagram' => 'https://instagram.com/phongkhamlocbinh',
+    'site_youtube' => 'https://youtube.com/phongkhamlocbinh',
+    'site_keywords' => 'phòng khám, đặt lịch khám, bác sĩ, chuyên khoa, dịch vụ y tế, lộc bình, lạng sơn',
+    'enable_booking' => 1,
+    'enable_registration' => 1,
+    'auto_confirm_booking' => 0,
+];
+?>

@@ -98,7 +98,7 @@ function get_redirect_url($role) {
         case 'admin':
             return 'admin/tongquan.php';
         case 'bacsi':
-            return 'docter/dashboard.php';
+            return 'doctor/index.php';
         case 'benhnhan':
         default:
             return 'index.php';

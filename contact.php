@@ -1,6 +1,20 @@
 <?php
-// Start by including header.php
-include 'includes/header.php';
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Liên hệ';
+require_once 'includes/functions.php';
+
+// Lấy thông tin từ cài đặt
+$site_name = get_setting('site_name', 'Phòng khám Lộc Bình');
+$site_address = get_setting('site_address', '123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh');
+$site_phone = get_setting('site_phone', '1900 1234');
+$site_hotline = get_setting('site_hotline', '098 765 4321');
+$site_support_phone = get_setting('site_support_phone', '012 345 6789');
+$site_email = get_setting('site_email', 'info@locbinh.com');
+$site_support_email = get_setting('site_support_email', 'support@locbinh.com');
+$site_advise_email = get_setting('site_advise_email', 'tuvan@locbinh.com');
+$site_working_hours = get_setting('site_working_hours', 'Thứ 2 - Thứ 6: 7:30 - 17:00');
+$site_maps = get_setting('site_maps', 'https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4241674197106!2d106.69904361471821!3d10.777214492319669!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f48f54742dd%3A0x74efcf82d5e9849!2zMTIzIEzDqiBM4bujaSwgQuG6v24gTmdow6ksIFF14bqtbiAxLCBUaMOgbmggcGjhu5EgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1626765797172!5m2!1svi!2s');
+$contact_image = get_setting('contact_image', 'assets/img/anh-gioithieu.jpg');
 
 // Xử lý gửi form liên hệ
 $message = '';
@@ -13,21 +27,17 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                   <i class="fas fa-check-circle me-2"></i> Cảm ơn bạn đã liên hệ! Chúng tôi sẽ phản hồi trong thời gian sớm nhất.
                 </div>';
 }
+
+// Phân tích chuỗi giờ làm việc thành mảng
+$working_hours = explode(',', $site_working_hours);
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Liên hệ - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
     <style>
         .contact-header {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('assets/img/anh-gioithieu.jpg');
+            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('<?php echo $contact_image; ?>');
             background-size: cover;
             background-position: center;
             color: white;
@@ -55,7 +65,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
         }
         .contact-icon i {
             font-size: 30px;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         .contact-form {
             background-color: #fff;
@@ -92,7 +102,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             margin-bottom: 20px;
         }
         .faq-link {
-            background: linear-gradient(135deg, #0d6efd, #198754);
+            background: linear-gradient(135deg, var(--primary-color), var(--accent-color));
             padding: 40px 0;
             text-align: center;
             border-radius: 10px;
@@ -102,6 +112,9 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
     </style>
 </head>
 <body>
+    <!-- Header -->
+    <?php include 'includes/header.php'; ?>
+
     <!-- Contact Header -->
     <section class="contact-header">
         <div class="container">
@@ -119,7 +132,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <i class="fas fa-map-marker-alt"></i>
                     </div>
                     <h4 class="mb-3">Địa chỉ</h4>
-                    <p>123 Đường Lê Lợi, Phường Bến Nghé, Quận 1, TP. Hồ Chí Minh</p>
+                    <p><?php echo htmlspecialchars($site_address); ?></p>
                 </div>
             </div>
             <div class="col-md-4">
@@ -128,9 +141,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <i class="fas fa-phone-alt"></i>
                     </div>
                     <h4 class="mb-3">Điện thoại</h4>
-                    <p class="mb-2">Tổng đài: <a href="tel:19001234">1900 1234</a></p>
-                    <p class="mb-2">Khẩn cấp: <a href="tel:0987654321">098 765 4321</a></p>
-                    <p>Tư vấn: <a href="tel:0123456789">012 345 6789</a></p>
+                    <p class="mb-2">Tổng đài: <a href="tel:<?php echo preg_replace('/\s+/', '', $site_phone); ?>"><?php echo htmlspecialchars($site_phone); ?></a></p>
+                    <?php if (!empty($site_hotline)): ?>
+                    <p class="mb-2">Khẩn cấp: <a href="tel:<?php echo preg_replace('/\s+/', '', $site_hotline); ?>"><?php echo htmlspecialchars($site_hotline); ?></a></p>
+                    <?php endif; ?>
+                    <?php if (!empty($site_support_phone)): ?>
+                    <p>Tư vấn: <a href="tel:<?php echo preg_replace('/\s+/', '', $site_support_phone); ?>"><?php echo htmlspecialchars($site_support_phone); ?></a></p>
+                    <?php endif; ?>
                 </div>
             </div>
             <div class="col-md-4">
@@ -139,9 +156,13 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                         <i class="fas fa-envelope"></i>
                     </div>
                     <h4 class="mb-3">Email</h4>
-                    <p class="mb-2">Thông tin: <a href="mailto:info@locbinh.com">info@locbinh.com</a></p>
-                    <p class="mb-2">Hỗ trợ: <a href="mailto:support@locbinh.com">support@locbinh.com</a></p>
-                    <p>Tư vấn: <a href="mailto:tuvan@locbinh.com">tuvan@locbinh.com</a></p>
+                    <p class="mb-2">Thông tin: <a href="mailto:<?php echo $site_email; ?>"><?php echo htmlspecialchars($site_email); ?></a></p>
+                    <?php if (!empty($site_support_email)): ?>
+                    <p class="mb-2">Hỗ trợ: <a href="mailto:<?php echo $site_support_email; ?>"><?php echo htmlspecialchars($site_support_email); ?></a></p>
+                    <?php endif; ?>
+                    <?php if (!empty($site_advise_email)): ?>
+                    <p>Tư vấn: <a href="mailto:<?php echo $site_advise_email; ?>"><?php echo htmlspecialchars($site_advise_email); ?></a></p>
+                    <?php endif; ?>
                 </div>
             </div>
         </div>
@@ -224,18 +245,11 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
                 <div class="contact-card">
                     <h4 class="text-center mb-4"><i class="far fa-clock me-2"></i> Giờ làm việc</h4>
                     <table class="hours-table">
+                        <?php foreach ($working_hours as $hour): ?>
                         <tr>
-                            <td><strong>Thứ 2 - Thứ 6:</strong></td>
-                            <td class="text-end">7:30 - 17:00</td>
+                            <td><strong><?php echo htmlspecialchars($hour); ?></strong></td>
                         </tr>
-                        <tr>
-                            <td><strong>Thứ 7:</strong></td>
-                            <td class="text-end">8:00 - 16:00</td>
-                        </tr>
-                        <tr>
-                            <td><strong>Chủ nhật:</strong></td>
-                            <td class="text-end">8:00 - 12:00</td>
-                        </tr>
+                        <?php endforeach; ?>
                     </table>
 
                     <h5 class="mt-4 mb-3 text-center">Các phòng ban</h5>
@@ -264,7 +278,7 @@ if ($_SERVER['REQUEST_METHOD'] == 'POST') {
             <div class="col-md-12">
                 <h2 class="text-center mb-4">Vị trí của chúng tôi</h2>
                 <div class="map-container">
-                    <iframe src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3919.4241674197106!2d106.69904361471821!3d10.777214492319669!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x31752f48f54742dd%3A0x74efcf82d5e9849!2zMTIzIEzDqiBM4bujaSwgQuG6v24gTmdow6ksIFF14bqtbiAxLCBUaMOgbmggcGjhu5EgSOG7kyBDaMOtIE1pbmgsIFZp4buHdCBOYW0!5e0!3m2!1svi!2s!4v1626765797172!5m2!1svi!2s" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
+                    <iframe src="<?php echo $site_maps; ?>" width="100%" height="450" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
                 </div>
             </div>
         </div>

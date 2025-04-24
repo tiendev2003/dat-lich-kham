@@ -1,26 +1,75 @@
+<?php
+// Kết nối đến database
+require_once 'includes/db_connect.php';
+require_once 'includes/functions.php';
+
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Trang chủ';
+
+// Lấy danh sách chuyên khoa
+$specialties_query = "SELECT * FROM chuyenkhoa ORDER BY id LIMIT 6";
+$specialties_result = $conn->query($specialties_query);
+$specialties = [];
+if ($specialties_result && $specialties_result->num_rows > 0) {
+    while ($row = $specialties_result->fetch_assoc()) {
+        $specialties[] = $row;
+    }
+}
+
+// Lấy danh sách tất cả chuyên khoa cho dropdown tìm kiếm
+$all_specialties_query = "SELECT * FROM chuyenkhoa ORDER BY ten_chuyenkhoa ASC";
+$all_specialties_result = $conn->query($all_specialties_query);
+$all_specialties = [];
+if ($all_specialties_result && $all_specialties_result->num_rows > 0) {
+    while ($row = $all_specialties_result->fetch_assoc()) {
+        $all_specialties[] = $row;
+    }
+}
+
+// Lấy tin tức mới nhất
+$news_query = "SELECT * FROM tintuc WHERE trang_thai = 'published' ORDER BY ngay_dang DESC LIMIT 3";
+$news_result = $conn->query($news_query);
+$news_items = [];
+if ($news_result && $news_result->num_rows > 0) {
+    while ($row = $news_result->fetch_assoc()) {
+        $news_items[] = $row;
+    }
+}
+
+// Lấy danh sách bác sĩ nổi bật
+$doctors_query = "SELECT b.*, c.ten_chuyenkhoa 
+                 FROM bacsi b 
+                 JOIN chuyenkhoa c ON b.chuyenkhoa_id = c.id 
+                 ORDER BY b.id LIMIT 4";
+$doctors_result = $conn->query($doctors_query);
+$doctors = [];
+if ($doctors_result && $doctors_result->num_rows > 0) {
+    while ($row = $doctors_result->fetch_assoc()) {
+        $doctors[] = $row;
+    }
+}
+
+// Lấy thông số từ cài đặt
+$banner_title = get_setting('banner_title', 'Đặt lịch khám trực tuyến');
+$banner_subtitle = get_setting('banner_subtitle', 'Dễ dàng - Nhanh chóng - Tiện lợi');
+$banner_img = get_setting('banner_image', 'assets/img/banner.jpg');
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
     <!-- Banner Section -->
-    <section class="banner">
+    <section class="banner" style="background-image: url('<?php echo $banner_img; ?>');">
         <div class="container">
             <div class="row">
                 <div class="col-md-6">
-                    <h1>Đặt lịch khám trực tuyến</h1>
-                    <p>Dễ dàng - Nhanh chóng - Tiện lợi</p>
+                    <h1><?php echo htmlspecialchars($banner_title); ?></h1>
+                    <p><?php echo htmlspecialchars($banner_subtitle); ?></p>
                     <a href="datlich.php" class="btn btn-primary">Đặt lịch ngay</a>
                 </div>
                 <div class="col-md-6">
@@ -28,10 +77,18 @@
                     <div class="search-form">
                         <h3>Tìm kiếm nhanh</h3>
                         <form action="search.php" method="GET">
-                            <div class="form-group">
-                                <input type="text" class="form-control" placeholder="Tìm bác sĩ hoặc chuyên khoa...">
-                                <button type="submit" class="btn btn-primary">Tìm kiếm</button>
+                            <div class="form-group mb-3">
+                                <input type="text" name="doctor_name" class="form-control" placeholder="Tìm bác sĩ...">
                             </div>
+                            <div class="form-group mb-3">
+                                <select name="specialty_id" class="form-control">
+                                    <option value="">Chọn chuyên khoa</option>
+                                    <?php foreach ($all_specialties as $specialty): ?>
+                                        <option value="<?php echo $specialty['id']; ?>"><?php echo htmlspecialchars($specialty['ten_chuyenkhoa']); ?></option>
+                                    <?php endforeach; ?>
+                                </select>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Tìm kiếm</button>
                         </form>
                     </div>
                 </div>
@@ -44,66 +101,62 @@
         <div class="container">
             <h2 class="section-title">Chuyên khoa nổi bật</h2>
             <div class="row">
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-tooth"></i>
-                        </div>
-                        <h3>Răng Hàm Mặt</h3>
-                        <p>Điều trị các bệnh lý về răng miệng</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
+                <?php if (empty($specialties)): ?>
+                    <div class="col-12 text-center">
+                        <p>Chưa có chuyên khoa nào được thêm vào hệ thống.</p>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-lungs"></i>
+                <?php else: ?>
+                    <?php foreach ($specialties as $specialty): ?>
+                    <div class="col-md-4 mb-4">
+                        <div class="specialty-card">
+                            <div class="specialty-icon">
+                                <?php if (!empty($specialty['icon'])): ?>
+                                    <i class="fas <?php echo $specialty['icon']; ?>"></i>
+                                <?php else: ?>
+                                    <i class="fas fa-stethoscope"></i>
+                                <?php endif; ?>
+                            </div>
+                            <h3><?php echo htmlspecialchars($specialty['ten_chuyenkhoa']); ?></h3>
+                            <p><?php echo !empty($specialty['mota']) ? htmlspecialchars(substr($specialty['mota'], 0, 100)) . '...' : 'Chuyên khoa y tế chất lượng cao'; ?></p>
+                            <a href="chuyenkhoa_chitiet.php?id=<?php echo $specialty['id']; ?>" class="btn btn-outline-primary">Xem chi tiết</a>
                         </div>
-                        <h3>Hô Hấp</h3>
-                        <p>Chẩn đoán và điều trị các bệnh về đường hô hấp</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-heartbeat"></i>
+                    <?php endforeach; ?>
+                <?php endif; ?>
+            </div>
+            <div class="text-center mt-4">
+                <a href="chuyenkhoa.php" class="btn btn-primary">Xem tất cả chuyên khoa</a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Featured Doctors -->
+    <section class="featured-doctors">
+        <div class="container">
+            <h2 class="section-title">Bác sĩ nổi bật</h2>
+            <div class="row">
+                <?php if (empty($doctors)): ?>
+                    <div class="col-12 text-center">
+                        <p>Chưa có bác sĩ nào được thêm vào hệ thống.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($doctors as $doctor): ?>
+                    <div class="col-md-3 mb-4">
+                        <div class="doctor-card">
+                            <div class="doctor-image">
+                                <?php if (!empty($doctor['hinh_anh'])): ?>
+                                    <img src="<?php echo htmlspecialchars($doctor['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($doctor['ho_ten']); ?>" class="img-fluid">
+                                <?php else: ?>
+                                    <img src="assets/img/bacsi/default-doctor.png" alt="Default Doctor Image" class="img-fluid">
+                                <?php endif; ?>
+                            </div>
+                            <h3><?php echo htmlspecialchars($doctor['ho_ten']); ?></h3>
+                            <p>Chuyên khoa: <?php echo htmlspecialchars($doctor['ten_chuyenkhoa']); ?></p>
+                            <a href="chitiet_bacsi.php?id=<?php echo $doctor['id']; ?>" class="btn btn-outline-primary">Xem chi tiết</a>
                         </div>
-                        <h3>Tim Mạch</h3>
-                        <p>Chăm sóc và điều trị các bệnh lý về tim mạch</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-heartbeat"></i>
-                        </div>
-                        <h3>Da liễu</h3>
-                        <p>Chăm sóc và điều trị các bệnh lý về da liễu</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-microscope"></i>
-                        </div>
-                        <h3>Xét Nghiệm</h3>
-                        <p>Xét nghiệm máu, xét nghiệm nước tiểu, xét nghiệm bạch cầu, hổng cầu,...</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="specialty-card">
-                        <div class="specialty-icon">
-                            <i class="fas fa-eye"></i>
-                        </div>
-                        <h3>Mắt</h3>
-                        <p>Chăm sóc và điều trị các bệnh lý về Mắt</p>
-                        <a href="chuyenkhoa_chitiet.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
         </div>
     </section>
@@ -113,45 +166,36 @@
         <div class="container">
             <h2 class="section-title">Tin tức sức khỏe</h2>
             <div class="row">
-                <div class="col-md-4">
-                    <div class="news-card">
-                        <img src="assets/img/hohap.webp" alt="Tin tức 1" class="news-image">
-                        <div class="news-content">
-                            <div class="news-date">
-                                <i class="far fa-calendar-alt"></i> 15/03/2024
+                <?php if (empty($news_items)): ?>
+                    <div class="col-12 text-center">
+                        <p>Chưa có tin tức nào được đăng.</p>
+                    </div>
+                <?php else: ?>
+                    <?php foreach ($news_items as $news): ?>
+                    <div class="col-md-4 mb-4">
+                        <div class="news-card">
+                            <?php if (!empty($news['hinh_anh'])): ?>
+                                <img src="<?php echo htmlspecialchars($news['hinh_anh']); ?>" alt="<?php echo htmlspecialchars($news['tieu_de']); ?>" class="news-image">
+                            <?php else: ?>
+                                <img src="assets/img/blog-1.png" alt="Default News Image" class="news-image">
+                            <?php endif; ?>
+                            <div class="news-content">
+                                <div class="news-date">
+                                    <i class="far fa-calendar-alt"></i> <?php echo date('d/m/Y', strtotime($news['ngay_dang'])); ?>
+                                </div>
+                                <h3><?php echo htmlspecialchars($news['tieu_de']); ?></h3>
+                                <?php 
+                                    // Tạo mô tả ngắn từ nội dung
+                                    $excerpt = strip_tags($news['noi_dung']);
+                                    $excerpt = substr($excerpt, 0, 150) . '...';
+                                ?>
+                                <p><?php echo $excerpt; ?></p>
+                                <a href="chitiet_tintuc.php?id=<?php echo $news['id']; ?>" class="read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
                             </div>
-                            <h3>Phòng ngừa các bệnh hô hấp mùa nắng nóng</h3>
-                            <p>Tìm hiểu các biện pháp phòng ngừa bệnh hô hấp hiệu quả trong thời tiết nắng nóng...</p>
-                            <a href="chitiet_tintuc.php" class="read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
                         </div>
                     </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="news-card">
-                        <img src="assets/img/tintuc_timmach.jpg" alt="Tin tức 2" class="news-image">
-                        <div class="news-content">
-                            <div class="news-date">
-                                <i class="far fa-calendar-alt"></i> 14/03/2024
-                            </div>
-                            <h3>Chế độ ăn cho người bệnh tim mạch</h3>
-                            <p>Những thực phẩm tốt và chế độ ăn uống phù hợp cho người mắc bệnh tim mạch...</p>
-                            <a href="chitiet_tintuc.php" class="read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="news-card">
-                        <img src="assets/img/rang.jpg" alt="Tin tức 3" class="news-image">
-                        <div class="news-content">
-                            <div class="news-date">
-                                <i class="far fa-calendar-alt"></i> 13/03/2024
-                            </div>
-                            <h3>Chăm sóc răng miệng đúng cách</h3>
-                            <p>Hướng dẫn chi tiết cách chăm sóc răng miệng hàng ngày để có hàm răng khỏe mạnh...</p>
-                            <a href="chitiet_tintuc.php" class="read-more">Đọc thêm <i class="fas fa-arrow-right"></i></a>
-                        </div>
-                    </div>
-                </div>
+                    <?php endforeach; ?>
+                <?php endif; ?>
             </div>
             <div class="text-center mt-4">
                 <a href="tintuc.php" class="btn btn-primary">Xem tất cả tin tức</a>
@@ -166,4 +210,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
-</html> 
+</html>

@@ -27,13 +27,18 @@ function getAllNews($filter = [])
         $search = $conn->real_escape_string($filter['search']);
         $whereClause .= " AND (tieu_de LIKE '%$search%' OR noi_dung LIKE '%$search%' OR meta_description LIKE '%$search%')";
     }
+    
+    // Thêm bộ lọc theo tag
+    if (!empty($filter['tag'])) {
+        $tag = $conn->real_escape_string($filter['tag']);
+        $whereClause .= " AND tags LIKE '%$tag%'";
+    }
 
-    $sql = "SELECT * FROM tintuc $whereClause ORDER BY id DESC";
-
+    $sql = "SELECT * FROM tintuc $whereClause ORDER BY ngay_dang DESC, id DESC";
     $result = $conn->query($sql);
     $news = [];
 
-    if ($result->num_rows > 0) {
+    if ($result && $result->num_rows > 0) {
         while ($row = $result->fetch_assoc()) {
             $news[] = $row;
         }

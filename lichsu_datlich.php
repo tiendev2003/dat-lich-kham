@@ -106,6 +106,10 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             background-color: #f8d7da;
             color: #721c24;
         }
+        .status-rescheduled {
+            background-color: #e2e3e5;
+            color: #41464b;
+        }
         .appointment-date {
             color: #6c757d;
             font-size: 14px;
@@ -163,82 +167,143 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
             background: transparent;
             border-bottom: 2px solid #0d6efd;
         }
+        .filter-collapse {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.5s ease;
+        }
+        .filter-collapse.show {
+            max-height: 500px;
+        }
+        #loadingIndicator {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            z-index: 100;
+            background: rgba(255,255,255,0.8);
+            padding: 20px;
+            border-radius: 5px;
+            display: none;
+        }
+        .filter-active {
+            background: #e9f0ff !important;
+            border: 1px solid #b8d0ff !important;
+        }
+        .filtered-results {
+            position: relative;
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <div class="container history-container">
+    <div class="container py-5">
         <div class="row">
-            <div class="col-lg-3">
-                <div class="profile-card mb-4">
-                    <div class="profile-header">
-                        <div class="text-center mb-3">
-                            <div class="profile-avatar d-inline-block position-relative" style="width: 100px; height: 100px; border-radius: 50%; overflow: hidden; border: 3px solid #fff; box-shadow: 0 0 10px rgba(0,0,0,0.1);">
-                                <img src="assets/img/user-avatar.png" alt="Ảnh đại diện" style="width: 100%; height: 100%; object-fit: cover;">
-                            </div>
-                        </div>
-                        <h5 class="text-center mb-1"><?php echo htmlspecialchars($patient['ho_ten']); ?></h5>
-                        <p class="text-center text-muted small mb-0">
-                            <i class="fas fa-phone-alt me-1"></i> <?php echo htmlspecialchars($patient['dien_thoai']); ?>
-                        </p>
-                    </div>
-                    <div class="list-group list-group-flush">
-                        <a href="user_profile.php" class="list-group-item list-group-item-action">
-                            <i class="fas fa-user me-2"></i> Thông tin cá nhân
-                        </a>
-                        <a href="lichsu_datlich.php" class="list-group-item list-group-item-action active">
-                            <i class="fas fa-calendar-check me-2"></i> Lịch sử đặt khám
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <i class="fas fa-bell me-2"></i> Thông báo
-                        </a>
-                        <a href="#" class="list-group-item list-group-item-action">
-                            <i class="fas fa-lock me-2"></i> Đổi mật khẩu
-                        </a>
-                        <a href="logout.php" class="list-group-item list-group-item-action text-danger">
-                            <i class="fas fa-sign-out-alt me-2"></i> Đăng xuất
-                        </a>
-                    </div>
-                </div>
+        <div class="col-md-3">
+                <?php include 'includes/user_sidebar.php'; ?>
             </div>
 
-            <div class="col-lg-9">
-                <div class="profile-card">
-                    <div class="profile-header d-flex justify-content-between align-items-center">
+            <div class="col-md-9">
+                <div class="card shadow-sm">
+                    <div class="card-header bg-primary text-white  d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="fas fa-history me-2"></i>Lịch sử đặt lịch khám</h4>
-                        <a href="datlich.php" class="btn btn-primary btn-sm">
+                        <a href="datlich.php" class="btn btn-success  btn-sm">
                             <i class="fas fa-plus-circle me-1"></i> Đặt lịch mới
                         </a>
                     </div>
-                    <div class="profile-content">
-                        <!-- Lọc và tìm kiếm -->
-                        <div class="filter-section">
-                            <form id="filter-form" class="row g-3">
-                                <div class="col-md-4">
-                                    <select class="form-select form-select-sm" id="statusFilter" name="status">
-                                        <option value="all">Tất cả trạng thái</option>
-                                        <option value="pending">Chờ xác nhận</option>
-                                        <option value="confirmed">Đã xác nhận</option>
-                                        <option value="completed">Đã hoàn thành</option>
-                                        <option value="cancelled">Đã hủy</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <select class="form-select form-select-sm" id="specialtyFilter" name="specialty">
-                                        <option value="all">Tất cả chuyên khoa</option>
-                                        <?php foreach($specialties as $specialty): ?>
-                                        <option value="<?php echo htmlspecialchars($specialty['id']); ?>"><?php echo htmlspecialchars($specialty['ten_chuyenkhoa']); ?></option>
-                                        <?php endforeach; ?>
-                                    </select>
-                                </div>
-                                <div class="col-md-4">
-                                    <div class="input-group input-group-sm">
-                                        <input type="text" class="form-control" id="searchInput" name="search" placeholder="Tìm kiếm...">
-                                        <button class="btn btn-outline-secondary" type="submit">
-                                            <i class="fas fa-search"></i>
-                                        </button>
+                    <div class="card-body">
+                        <!-- Lọc và tìm kiếm nâng cao -->
+                        <div class="filter-section mb-4">
+                            <div class="d-flex justify-content-between align-items-center mb-3">
+                                <h5 class="mb-0"><i class="fas fa-filter me-2"></i>Lọc lịch hẹn</h5>
+                                <button type="button" class="btn btn-sm btn-outline-secondary" id="toggleFilterBtn">
+                                    <i class="fas fa-sliders-h me-1"></i> Hiển thị bộ lọc
+                                </button>
+                            </div>
+                            
+                            <form id="filter-form" class="filter-collapse">
+                                <div class="card card-body border-light bg-light-subtle">
+                                    <div class="row g-3">
+                                        <div class="col-md-6">
+                                            <label class="form-label small mb-1">Khoảng thời gian</label>
+                                            <div class="d-flex gap-2">
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-white">Từ</span>
+                                                    <input type="date" class="form-control" name="date_from" id="dateFrom">
+                                                </div>
+                                                <div class="input-group input-group-sm">
+                                                    <span class="input-group-text bg-white">Đến</span>
+                                                    <input type="date" class="form-control" name="date_to" id="dateTo">
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small mb-1">Bác sĩ và chuyên khoa</label>
+                                            <div class="d-flex gap-2">
+                                                <select class="form-select form-select-sm" id="doctorFilter" name="doctor">
+                                                    <option value="">Tất cả bác sĩ</option>
+                                                    <?php 
+                                                    $stmt = $conn->prepare("SELECT DISTINCT b.id, b.ho_ten FROM bacsi b 
+                                                                            JOIN lichhen l ON l.bacsi_id = b.id 
+                                                                            WHERE l.benhnhan_id = ? ORDER BY b.ho_ten");
+                                                    $stmt->bind_param('i', $patient['id']);
+                                                    $stmt->execute();
+                                                    $doctors = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+                                                    foreach($doctors as $doctor): 
+                                                    ?>
+                                                    <option value="<?php echo $doctor['id']; ?>"><?php echo htmlspecialchars($doctor['ho_ten']); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                                <select class="form-select form-select-sm" id="specialtyFilter" name="specialty">
+                                                    <option value="">Tất cả chuyên khoa</option>
+                                                    <?php foreach($specialties as $specialty): ?>
+                                                    <option value="<?php echo htmlspecialchars($specialty['id']); ?>"><?php echo htmlspecialchars($specialty['ten_chuyenkhoa']); ?></option>
+                                                    <?php endforeach; ?>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small mb-1">Trạng thái và sắp xếp</label>
+                                            <div class="d-flex gap-2">
+                                                <select class="form-select form-select-sm" id="statusFilter" name="status">
+                                                    <option value="">Tất cả trạng thái</option>
+                                                    <option value="pending">Chờ xác nhận</option>
+                                                    <option value="confirmed">Đã xác nhận</option>
+                                                    <option value="completed">Đã hoàn thành</option>
+                                                    <option value="cancelled">Đã hủy</option>
+                                                    <option value="rescheduled">Đã đổi lịch</option>
+                                                </select>
+                                                <select class="form-select form-select-sm" id="sortFilter" name="sort">
+                                                    <option value="newest">Mới nhất trước</option>
+                                                    <option value="oldest">Cũ nhất trước</option>
+                                                    <option value="service">Theo dịch vụ</option>
+                                                </select>
+                                            </div>
+                                        </div>
+                                        <div class="col-md-6">
+                                            <label class="form-label small mb-1">Tìm kiếm</label>
+                                            <div class="input-group input-group-sm">
+                                                <input type="text" class="form-control" id="searchInput" name="search" placeholder="Tìm theo mã lịch hẹn, lý do khám...">
+                                                <select class="form-select" name="search_type" style="max-width: 130px;">
+                                                    <option value="all">Tất cả</option>
+                                                    <option value="code">Mã lịch hẹn</option>
+                                                    <option value="reason">Lý do khám</option>
+                                                </select>
+                                                <button class="btn btn-outline-primary" type="submit">
+                                                    <i class="fas fa-search"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                        <div class="col-12 d-flex justify-content-end gap-2 pt-2 border-top mt-2">
+                                            <button type="reset" class="btn btn-sm btn-outline-secondary" id="resetFilter">
+                                                <i class="fas fa-undo-alt me-1"></i>Đặt lại
+                                            </button>
+                                            <button type="submit" class="btn btn-sm btn-primary" id="applyFilter">
+                                                <i class="fas fa-filter me-1"></i>Áp dụng bộ lọc
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </form>
@@ -292,6 +357,7 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                                 case 'pending': $status_text = 'Chờ xác nhận'; break;
                                                 case 'completed': $status_text = 'Đã hoàn thành'; break;
                                                 case 'cancelled': $status_text = 'Đã hủy'; break;
+                                                case 'rescheduled': $status_text = 'Đã đổi lịch'; break;
                                                 default: $status_text = ucfirst($appointment['trang_thai']);
                                             }
                                             echo htmlspecialchars($status_text); 
@@ -309,12 +375,24 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi']); ?></span></div>
+                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi'] ?? 'Chưa cập nhật'); ?></span></div>
                                         </div>
+                                        <?php if (!empty($appointment['phi_kham'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-money-bill-alt"></i></div>
+                                            <div>Phí khám: <span class="fw-medium"><?php echo number_format($appointment['phi_kham'], 0, ',', '.'); ?> VNĐ</span></div>
+                                        </div>
+                                        <?php endif; ?>
                                         <?php if (!empty($appointment['ma_lichhen'])): ?>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
                                             <div>Mã lịch hẹn: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ma_lichhen']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ly_do'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-comment-alt"></i></div>
+                                            <div>Lý do khám: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ly_do']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
                                         <?php if ($appointment['trang_thai'] === 'completed' && !empty($appointment['chan_doan'])): ?>
@@ -323,10 +401,47 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <div>Chẩn đoán: <span class="text-primary fw-medium"><?php echo htmlspecialchars($appointment['chan_doan']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
+                                        <?php if ($appointment['trang_thai'] === 'completed' && !empty($appointment['ket_qua'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-clipboard-check"></i></div>
+                                            <div>Kết quả: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ket_qua']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if ($appointment['trang_thai'] === 'completed' && !empty($appointment['don_thuoc'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+                                            <div>Đơn thuốc: <span class="fw-medium"><?php echo htmlspecialchars($appointment['don_thuoc']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if ($appointment['trang_thai'] === 'completed' && !empty($appointment['loi_dan'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-comment-dots"></i></div>
+                                            <div>Lời dặn: <span class="fst-italic"><?php echo htmlspecialchars($appointment['loi_dan']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                         <?php if ($appointment['trang_thai'] === 'cancelled' && !empty($appointment['ly_do_huy'])): ?>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-info-circle text-danger"></i></div>
                                             <div>Lý do hủy: <span class="text-danger"><?php echo htmlspecialchars($appointment['ly_do_huy']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if ($appointment['trang_thai'] === 'cancelled' && !empty($appointment['ngay_huy'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-calendar-times"></i></div>
+                                            <div>Ngày hủy: <span class="fw-medium"><?php echo date('d/m/Y', strtotime($appointment['ngay_huy'])); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if ($appointment['trang_thai'] === 'rescheduled' && !empty($appointment['ly_do_doi'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-exchange-alt text-warning"></i></div>
+                                            <div>Lý do đổi lịch: <span class="text-warning"><?php echo htmlspecialchars($appointment['ly_do_doi']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($appointment['ghi_chu'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-sticky-note"></i></div>
+                                            <div>Ghi chú: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ghi_chu']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
                                     </div>
@@ -334,24 +449,17 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <a href="xacnhan_datlich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Chi tiết
                                         </a>
-                                        
-                                        <?php if ($appointment['trang_thai'] === 'completed'): ?>
-                                        <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#ratingModal" data-appointment-id="<?php echo $appointment['id']; ?>">
-                                            <i class="fas fa-star"></i> Đánh giá
-                                        </button>
-                                        <a href="datlich.php?rebook=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-info">
-                                            <i class="fas fa-calendar-plus"></i> Đặt lại
-                                        </a>
-                                        <?php elseif ($appointment['trang_thai'] === 'cancelled'): ?>
-                                        <a href="datlich.php?rebook=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-calendar-plus"></i> Đặt lại lịch hẹn
-                                        </a>
-                                        <?php elseif (in_array($appointment['trang_thai'], ['pending', 'confirmed'])): ?>
-                                        <a href="xuly_doilich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-warning">
+                                        <?php if ($appointment['trang_thai'] == 'pending'): ?>
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=reschedule" class="btn btn-sm btn-outline-warning">
                                             <i class="fas fa-edit"></i> Thay đổi lịch
                                         </a>
-                                        <a href="xuly_huylich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-danger">
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=cancel" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-times"></i> Hủy lịch hẹn
+                                        </a>
+                                        <?php endif; ?>
+                                        <?php if (!isset($appointment['thanh_toan']) || $appointment['thanh_toan'] !== 'paid'): ?>
+                                        <a href="thanhtoan.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-credit-card"></i> Thanh toán
                                         </a>
                                         <?php endif; ?>
                                     </div>
@@ -376,7 +484,13 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         <div class="appointment-doctor">BS. <?php echo htmlspecialchars($appointment['doctor_name']); ?> - <?php echo htmlspecialchars($appointment['specialty']); ?></div>
                                         <div class="appointment-status status-<?php echo htmlspecialchars($appointment['trang_thai']); ?>">
                                             <?php 
-                                            echo $appointment['trang_thai'] === 'confirmed' ? 'Đã xác nhận' : 'Chờ xác nhận'; 
+                                            $status_text = '';
+                                            switch($appointment['trang_thai']) {
+                                                case 'confirmed': $status_text = 'Đã xác nhận'; break;
+                                                case 'pending': $status_text = 'Chờ xác nhận'; break;
+                                                default: $status_text = ucfirst($appointment['trang_thai']);
+                                            }
+                                            echo htmlspecialchars($status_text); 
                                             ?>
                                         </div>
                                     </div>
@@ -391,18 +505,18 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi']); ?></span></div>
+                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi'] ?? 'Chưa cập nhật'); ?></span></div>
                                         </div>
-                                        <?php if (!empty($appointment['ma_lichhen'])): ?>
-                                        <div class="appointment-detail">
-                                            <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
-                                            <div>Mã lịch hẹn: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ma_lichhen']); ?></span></div>
-                                        </div>
-                                        <?php endif; ?>
                                         <?php if (!empty($appointment['phi_kham'])): ?>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-money-bill-alt"></i></div>
                                             <div>Phí khám: <span class="fw-medium"><?php echo number_format($appointment['phi_kham'], 0, ',', '.'); ?> VNĐ</span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ma_lichhen'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
+                                            <div>Mã lịch hẹn: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ma_lichhen']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
                                         <?php if (!empty($appointment['ly_do'])): ?>
@@ -411,17 +525,29 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <div>Lý do khám: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ly_do']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
+                                        
+                                        <?php if (!empty($appointment['ghi_chu'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-sticky-note"></i></div>
+                                            <div>Ghi chú: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ghi_chu']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="appointment-actions">
                                         <a href="xacnhan_datlich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-eye"></i> Chi tiết
                                         </a>
-                                        <a href="xuly_doilich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-warning">
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=reschedule" class="btn btn-sm btn-outline-warning">
                                             <i class="fas fa-edit"></i> Thay đổi lịch
                                         </a>
-                                        <a href="xuly_huylich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-danger">
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=cancel" class="btn btn-sm btn-outline-danger">
                                             <i class="fas fa-times"></i> Hủy lịch hẹn
                                         </a>
+                                        <?php if (!isset($appointment['thanh_toan']) || $appointment['thanh_toan'] !== 'paid'): ?>
+                                        <a href="thanhtoan.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-success">
+                                            <i class="fas fa-credit-card"></i> Thanh toán
+                                        </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
                                 <?php endforeach; ?>
@@ -454,8 +580,26 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi']); ?></span></div>
+                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi'] ?? 'Chưa cập nhật'); ?></span></div>
                                         </div>
+                                        <?php if (!empty($appointment['phi_kham'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-money-bill-alt"></i></div>
+                                            <div>Phí khám: <span class="fw-medium"><?php echo number_format($appointment['phi_kham'], 0, ',', '.'); ?> VNĐ</span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ma_lichhen'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
+                                            <div>Mã lịch hẹn: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ma_lichhen']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ly_do'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-comment-alt"></i></div>
+                                            <div>Lý do khám: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ly_do']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                         <?php if (!empty($appointment['chan_doan'])): ?>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-comment-medical"></i></div>
@@ -468,14 +612,38 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <div>Kết quả: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ket_qua']); ?></span></div>
                                         </div>
                                         <?php endif; ?>
+                                        <?php if (!empty($appointment['don_thuoc'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-prescription-bottle-alt"></i></div>
+                                            <div>Đơn thuốc: <span class="fw-medium"><?php echo htmlspecialchars($appointment['don_thuoc']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['loi_dan'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-comment-dots"></i></div>
+                                            <div>Lời dặn: <span class="fst-italic"><?php echo htmlspecialchars($appointment['loi_dan']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        
+                                        <?php if (!empty($appointment['ghi_chu'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-sticky-note"></i></div>
+                                            <div>Ghi chú: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ghi_chu']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="appointment-actions">
                                         <a href="xacnhan_datlich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-file-medical"></i> Xem kết quả
+                                            <i class="fas fa-eye"></i> Chi tiết
                                         </a>
                                         <button class="btn btn-sm btn-outline-success" data-bs-toggle="modal" data-bs-target="#ratingModal" data-appointment-id="<?php echo $appointment['id']; ?>">
                                             <i class="fas fa-star"></i> Đánh giá
                                         </button>
+                                        <?php if (!empty($appointment['ket_qua'])): ?>
+                                        <a href="xacnhan_datlich.php?id=<?php echo $appointment['id']; ?>&result=view" class="btn btn-sm btn-outline-info">
+                                            <i class="fas fa-file-medical"></i> Xem kết quả
+                                        </a>
+                                        <?php endif; ?>
                                         <a href="datlich.php?rebook=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-info">
                                             <i class="fas fa-calendar-plus"></i> Đặt lại
                                         </a>
@@ -511,8 +679,26 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi']); ?></span></div>
+                                            <div>Địa điểm: <span class="fw-medium"><?php echo htmlspecialchars($appointment['dia_chi'] ?? 'Chưa cập nhật'); ?></span></div>
                                         </div>
+                                        <?php if (!empty($appointment['phi_kham'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-money-bill-alt"></i></div>
+                                            <div>Phí khám: <span class="fw-medium"><?php echo number_format($appointment['phi_kham'], 0, ',', '.'); ?> VNĐ</span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ma_lichhen'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
+                                            <div>Mã lịch hẹn: <span class="fw-medium"><?php echo htmlspecialchars($appointment['ma_lichhen']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
+                                        <?php if (!empty($appointment['ly_do'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-comment-alt"></i></div>
+                                            <div>Lý do khám: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ly_do']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                         <?php if (!empty($appointment['ly_do_huy'])): ?>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-info-circle text-danger"></i></div>
@@ -525,8 +711,18 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                                             <div>Ngày hủy: <span class="fw-medium"><?php echo date('d/m/Y', strtotime($appointment['ngay_huy'])); ?></span></div>
                                         </div>
                                         <?php endif; ?>
+                                        
+                                        <?php if (!empty($appointment['ghi_chu'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-sticky-note"></i></div>
+                                            <div>Ghi chú: <span class="fst-italic"><?php echo htmlspecialchars($appointment['ghi_chu']); ?></span></div>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="appointment-actions">
+                                        <a href="xacnhan_datlich.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
+                                            <i class="fas fa-eye"></i> Chi tiết
+                                        </a>
                                         <a href="datlich.php?rebook=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-calendar-plus"></i> Đặt lại lịch hẹn
                                         </a>
@@ -643,6 +839,23 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
+            // Hiển thị/ẩn bộ lọc
+            const toggleFilterBtn = document.getElementById('toggleFilterBtn');
+            const filterForm = document.getElementById('filter-form');
+            
+            toggleFilterBtn.addEventListener('click', function() {
+                filterForm.classList.toggle('show');
+                if (filterForm.classList.contains('show')) {
+                    toggleFilterBtn.innerHTML = '<i class="fas fa-times me-1"></i> Ẩn bộ lọc';
+                    toggleFilterBtn.classList.add('btn-outline-primary');
+                    toggleFilterBtn.classList.remove('btn-outline-secondary');
+                } else {
+                    toggleFilterBtn.innerHTML = '<i class="fas fa-sliders-h me-1"></i> Hiển thị bộ lọc';
+                    toggleFilterBtn.classList.remove('btn-outline-primary');
+                    toggleFilterBtn.classList.add('btn-outline-secondary');
+                }
+            });
+            
             // Xử lý đánh giá sao
             const stars = document.querySelectorAll('.star-rating');
             const ratingInput = document.getElementById('ratingValue');
@@ -711,26 +924,166 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
                 });
             }
             
-            // Xử lý filter
-            const filterForm = document.getElementById('filter-form');
-            if (filterForm) {
-                filterForm.addEventListener('submit', function(e) {
-                    e.preventDefault();
-                    
-                    // Thực hiện lọc dữ liệu (demo)
-                    const statusFilter = document.getElementById('statusFilter').value;
-                    const specialtyFilter = document.getElementById('specialtyFilter').value;
-                    const searchInput = document.getElementById('searchInput').value;
-                    
-                    console.log('Filtering with:', {
-                        status: statusFilter,
-                        specialty: specialtyFilter,
-                        search: searchInput
-                    });
-                    
-                    // Giả lập lọc dữ liệu - trong thực tế sẽ gửi AJAX request và cập nhật nội dung
-                    alert('Đang lọc dữ liệu: Trạng thái = ' + statusFilter + ', Chuyên khoa = ' + specialtyFilter + ', Tìm kiếm = ' + searchInput);
+            // Thêm indicator cho loading
+            const tabPanes = document.querySelectorAll('.tab-pane');
+            tabPanes.forEach(pane => {
+                const loadingDiv = document.createElement('div');
+                loadingDiv.id = 'loadingIndicator';
+                loadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div><div class="ms-2">Đang tải dữ liệu...</div>';
+                pane.classList.add('filtered-results');
+                pane.appendChild(loadingDiv);
+            });
+            
+            // AJAX filtering functionality
+            const applyFilter = document.getElementById('applyFilter');
+            const resetFilter = document.getElementById('resetFilter');
+            
+            // Set today as the default date for dateTo
+            document.getElementById('dateTo').valueAsDate = new Date();
+            
+            // Set 3 months ago as the default date for dateFrom
+            const threeMonthsAgo = new Date();
+            threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+            document.getElementById('dateFrom').valueAsDate = threeMonthsAgo;
+            
+            // Filter function
+            applyFilter.addEventListener('click', function(e) {
+                e.preventDefault();
+                applyFiltering();
+            });
+            
+            // Reset filter button
+            resetFilter.addEventListener('click', function(e) {
+                setTimeout(() => {
+                    document.getElementById('dateTo').valueAsDate = new Date();
+                    const threeMonthsAgo = new Date();
+                    threeMonthsAgo.setMonth(threeMonthsAgo.getMonth() - 3);
+                    document.getElementById('dateFrom').valueAsDate = threeMonthsAgo;
+                    applyFiltering();
+                }, 100);
+            });
+            
+            // Tab change handling
+            const tabButtons = document.querySelectorAll('button[data-bs-toggle="tab"]');
+            tabButtons.forEach(button => {
+                button.addEventListener('shown.bs.tab', function (event) {
+                    const activeTabId = event.target.getAttribute('data-bs-target').substr(1);
+                    applyFiltering(activeTabId);
                 });
+            });
+            
+            // Main filtering function
+            function applyFiltering(tabId = null) {
+                // Make filter card active
+                document.querySelector('.card.card-body').classList.add('filter-active');
+                
+                // Show loading indicator
+                const activeTab = tabId ? document.getElementById(tabId) : document.querySelector('.tab-pane.active');
+                const loadingIndicator = activeTab.querySelector('#loadingIndicator');
+                loadingIndicator.style.display = 'flex';
+                
+                // Get all form data
+                const formData = new FormData(document.getElementById('filter-form'));
+                
+                // Add the active tab type to filter
+                const tabType = tabId || document.querySelector('.tab-pane.active').id;
+                formData.append('tab_type', tabType);
+                
+                // Convert FormData to URL params
+                const params = new URLSearchParams(formData);
+                
+                // Add current page info
+                formData.append('page', '1');
+                
+                // Send AJAX request
+                fetch('filter_appointments.php', {
+                    method: 'POST',
+                    body: formData
+                })
+                .then(response => response.json())
+                .then(data => {
+                    // Update the tab content with filtered results
+                    if (data.status === 'success') {
+                        // Update the tab content
+                        activeTab.innerHTML = data.html;
+                        
+                        // Re-add the loading indicator since we replaced everything
+                        activeTab.classList.add('filtered-results');
+                        const newLoadingDiv = document.createElement('div');
+                        newLoadingDiv.id = 'loadingIndicator';
+                        newLoadingDiv.innerHTML = '<div class="spinner-border text-primary" role="status"><span class="visually-hidden">Đang tải...</span></div><div class="ms-2">Đang tải dữ liệu...</div>';
+                        newLoadingDiv.style.display = 'none';
+                        activeTab.appendChild(newLoadingDiv);
+                        
+                        // Update badge counter
+                        const countBadge = document.querySelector(`button[data-bs-target="#${activeTab.id}"] .badge`);
+                        if (countBadge) {
+                            countBadge.textContent = data.count;
+                        }
+                        
+                        // Show filter summary if applied
+                        const filterCount = Object.values(data.filters).filter(val => val !== '').length;
+                        if (filterCount > 0) {
+                            const filterSummary = document.createElement('div');
+                            filterSummary.className = 'alert alert-info d-flex align-items-center my-3';
+                            
+                            let summaryText = `<i class="fas fa-filter me-2"></i> Đang hiển thị ${data.count} kết quả theo: `;
+                            const filterTexts = [];
+                            
+                            if (data.filters.date_from) filterTexts.push(`Từ ngày ${data.filters.date_from}`);
+                            if (data.filters.date_to) filterTexts.push(`Đến ngày ${data.filters.date_to}`);
+                            if (data.filters.doctor_name) filterTexts.push(`Bác sĩ ${data.filters.doctor_name}`);
+                            if (data.filters.specialty_name) filterTexts.push(`Chuyên khoa ${data.filters.specialty_name}`);
+                            if (data.filters.status_text) filterTexts.push(`Trạng thái ${data.filters.status_text}`);
+                            if (data.filters.search) filterTexts.push(`Tìm kiếm "${data.filters.search}"`);
+                            
+                            summaryText += filterTexts.join(', ');
+                            filterSummary.innerHTML = summaryText;
+                            
+                            // Add the summary before the appointment listings
+                            if (data.count > 0) {
+                                activeTab.insertBefore(filterSummary, activeTab.firstChild.nextSibling);
+                            }
+                        }
+                    } else {
+                        // Show error
+                        console.error('Error filtering appointments:', data.message);
+                        activeTab.innerHTML += `<div class="alert alert-danger mt-3">${data.message}</div>`;
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    activeTab.innerHTML += `<div class="alert alert-danger mt-3">Đã xảy ra lỗi khi lọc dữ liệu. Vui lòng thử lại sau.</div>`;
+                })
+                .finally(() => {
+                    // Hide loading indicator
+                    loadingIndicator.style.display = 'none';
+                    
+                    // Remove active state after delay
+                    setTimeout(() => {
+                        document.querySelector('.card.card-body').classList.remove('filter-active');
+                    }, 500);
+                });
+            }
+            
+            // Set initial values if provided in URL
+            const urlParams = new URLSearchParams(window.location.search);
+            if (urlParams.has('specialty')) {
+                document.getElementById('specialtyFilter').value = urlParams.get('specialty');
+            }
+            if (urlParams.has('status')) {
+                document.getElementById('statusFilter').value = urlParams.get('status');
+            }
+            if (urlParams.has('search')) {
+                document.getElementById('searchInput').value = urlParams.get('search');
+            }
+            
+            // Expand filter by default if any filter is applied
+            if (urlParams.toString()) {
+                filterForm.classList.add('show');
+                toggleFilterBtn.innerHTML = '<i class="fas fa-times me-1"></i> Ẩn bộ lọc';
+                toggleFilterBtn.classList.add('btn-outline-primary');
+                toggleFilterBtn.classList.remove('btn-outline-secondary');
             }
         });
     </script>

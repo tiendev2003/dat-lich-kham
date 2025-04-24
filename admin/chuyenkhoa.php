@@ -1,4 +1,7 @@
 <?php
+// Kiểm tra quyền truy cập
+require_once 'includes/auth_check.php';
+
 // Kết nối đến cơ sở dữ liệu
 require_once 'includes/db_connect.php';
 
@@ -41,7 +44,6 @@ $specialties = getAllSpecialties($search, $current_page, $items_per_page);
     <!-- Admin CSS -->
     <link rel="stylesheet" href="asset/admin.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="asset/chuyenkhoa.css">
     <style>
         .specialty-card {
             border: 1px solid #ddd;
@@ -84,18 +86,10 @@ $specialties = getAllSpecialties($search, $current_page, $items_per_page);
         }
         .search-filter {
             background-color: #f8f9fa;
-            padding: 20px;
-            border-radius: 8px;
+             border-radius: 8px;
             margin-bottom: 20px;
         }
-        .content-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            padding: 15px 0;
-            border-bottom: 1px solid #eee;
-        }
+      
         .no-specialties {
             text-align: center;
             padding: 40px;
@@ -111,9 +105,9 @@ $specialties = getAllSpecialties($search, $current_page, $items_per_page);
             <?php include 'includes/sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-12 mt-5 main-content">
+            <div class="col-md-12 main-content  mt-5 ">
                 <div class="content-wrapper">
-                    <div class="content-header d-flex justify-content-between align-items-center mb-4">
+                    <div class="content-header d-flex justify-content-between align-items-center">
                         <h2 class="page-title">Quản lý Chuyên khoa</h2>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addSpecialtyModal">
                             <i class="fas fa-plus"></i> Thêm chuyên khoa

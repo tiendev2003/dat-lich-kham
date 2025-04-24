@@ -11,16 +11,31 @@
  * @return mixed Giá trị cài đặt
  */
 function get_setting($key, $default = '') {
-    global $conn;
     static $settings = null;
     
-    // Nếu chưa lấy cài đặt từ database, lấy và lưu vào cache
+    // Nếu chưa lấy cài đặt, thử nạp từ file đã đồng bộ trước
     if ($settings === null) {
-        $settings = [];
-        $result = $conn->query("SELECT ten_key, ten_value FROM caidat_website");
-        if ($result && $result->num_rows > 0) {
-            while ($row = $result->fetch_assoc()) {
-                $settings[$row['ten_key']] = $row['ten_value'];
+        // Kiểm tra xem file settings_data.php đã được tạo chưa
+        if (file_exists(__DIR__ . '/settings_data.php')) {
+            include_once __DIR__ . '/settings_data.php';
+            if (isset($settings_data) && is_array($settings_data)) {
+                $settings = $settings_data;
+                // Kiểm tra xem có cần làm mới dữ liệu không
+                if (file_exists(__DIR__ . '/settings_cache.php')) {
+                    include_once __DIR__ . '/settings_cache.php';
+                }
+            }
+        }
+        
+        // Nếu không có file hoặc cần làm mới, lấy từ database
+        if ($settings === null) {
+            global $conn;
+            $settings = [];
+            $result = $conn->query("SELECT ten_key, ten_value FROM caidat_website");
+            if ($result && $result->num_rows > 0) {
+                while ($row = $result->fetch_assoc()) {
+                    $settings[$row['ten_key']] = $row['ten_value'];
+                }
             }
         }
     }
@@ -315,7 +330,7 @@ function redirect_by_role($role) {
             header('Location: admin/tongquan.php');
             break;
         case 'bacsi':
-            header('Location: docter/dashboard.php');
+            header('Location: doctor/index.php');
             break;
         case 'benhnhan':
             header('Location: index.php');

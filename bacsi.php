@@ -1,7 +1,16 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Đội ngũ bác sĩ';
+require_once 'includes/functions.php';
+
 // Kết nối database
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
+
+// Lấy thông số từ cài đặt
+$doctors_title = get_setting('doctors_title', 'Đội ngũ bác sĩ');
+$doctors_subtitle = get_setting('doctors_subtitle', 'Các bác sĩ chuyên nghiệp và giàu kinh nghiệm của chúng tôi');
+$doctors_banner = get_setting('doctors_banner_image', '');
 
 // Xử lý lọc theo chuyên khoa
 $specialty_id = isset($_GET['specialty']) ? (int)$_GET['specialty'] : 0;
@@ -54,25 +63,36 @@ if ($doctors_result && $doctors_result->num_rows > 0) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đội ngũ bác sĩ - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/doctors.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        .doctor-banner {
+            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
+                        url('<?php echo !empty($doctors_banner) ? $doctors_banner : 'assets/img/doctors-banner.jpg'; ?>');
+            background-size: cover;
+            background-position: center;
+            padding: 80px 0;
+            margin-bottom: 40px;
+            color: #fff;
+            text-align: center;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner Section -->
+    <div class="doctor-banner">
+        <div class="container">
+            <h1 class="display-4"><?php echo htmlspecialchars($doctors_title); ?></h1>
+            <p class="lead"><?php echo htmlspecialchars($doctors_subtitle); ?></p>
+        </div>
+    </div>
+
     <!-- Doctor List Section -->
     <section class="doctor-list">
         <div class="container">
-            <h1 class="page-title">Đội ngũ bác sĩ</h1>
-            
             <!-- Filters -->
             <div class="doctor-filters mb-4">
                 <form action="" method="GET" class="row g-3">

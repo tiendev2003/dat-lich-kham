@@ -187,7 +187,7 @@ CREATE TABLE caidat_website (
 
 -- Chèn dữ liệu mẫu cho bảng người dùng
 INSERT INTO nguoidung (email, mat_khau, vai_tro) VALUES
-('admin@example.com', '$2y$10$92IXUNpkjO0rOQ5byMi.Ye4oKoEa3Ro9llC/.og/at2.uheWG/igi', 'admin');
+('admin@example.com', '$2y$10$HsrH9Jjm1tAx0Ju5WROe5OdajgusFeWiyfsiA9ZsBfeUszs/Byz8q', 'admin');
 
 -- Chèn dữ liệu mẫu cho bảng chuyên khoa
 INSERT INTO chuyenkhoa (ten_chuyenkhoa, icon, mota) VALUES

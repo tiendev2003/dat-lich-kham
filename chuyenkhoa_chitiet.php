@@ -1,10 +1,12 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
 // Start the session before any output
 session_start();
 
-// Kết nối database
+// Kết nối database và load functions
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
+require_once 'includes/functions.php';
 
 // Lấy ID chuyên khoa từ tham số URL
 $specialty_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -25,6 +27,12 @@ if (!$specialty_result || $specialty_result->num_rows == 0) {
 }
 
 $specialty = $specialty_result->fetch_assoc();
+
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = $specialty['ten_chuyenkhoa'];
+
+// Lấy thông số từ cài đặt
+$site_name = get_setting('site_name', 'Phòng Khám Lộc Bình');
 
 // Lấy danh sách bác sĩ thuộc chuyên khoa
 $doctors_sql = "SELECT * FROM bacsi WHERE chuyenkhoa_id = $specialty_id";
@@ -62,15 +70,8 @@ function formatDescription($text) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $specialty['ten_chuyenkhoa'] ?> - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/chuyenkhoa_chitiet.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .specialty-header {
             background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
@@ -105,7 +106,7 @@ function formatDescription($text) {
         .feature-icon {
             font-size: 40px;
             margin-bottom: 15px;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         .doctor-card {
             border-radius: 10px;
@@ -162,7 +163,7 @@ function formatDescription($text) {
             width: 70px;
             height: 70px;
             border-radius: 50%;
-            background-color: #e1f0ff;
+            background-color: rgba(var(--primary-color-rgb), 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -170,7 +171,7 @@ function formatDescription($text) {
         }
         .service-icon i {
             font-size: 30px;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         .service-title {
             font-size: 18px;
@@ -187,8 +188,8 @@ function formatDescription($text) {
             background-color: #f8f9fa;
         }
         .accordion-button:not(.collapsed) {
-            background-color: #e1f0ff;
-            color: #0d6efd;
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            color: var(--primary-color);
         }
         .accordion-item {
             margin-bottom: 10px;
@@ -196,7 +197,7 @@ function formatDescription($text) {
             overflow: hidden;
         }
         .book-consultation {
-            background-color: #0d6efd;
+            background-color: var(--primary-color);
             color: white;
             padding: 40px 0;
             text-align: center;
@@ -243,6 +244,15 @@ function formatDescription($text) {
             margin-top: 10px;
             font-style: italic;
         }
+        :root {
+            --primary-color-rgb: <?php 
+                $hex = ltrim(get_setting('primary_color', '#005bac'), '#');
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                echo "$r,$g,$b";
+            ?>;
+        }
     </style>
 </head>
 <body>
@@ -270,7 +280,7 @@ function formatDescription($text) {
                         <?php if (!empty($specialty['mota'])): ?>
                             <?= $specialty['mota'] ?>
                         <?php else: ?>
-                            <p>Chuyên khoa <?= $specialty['ten_chuyenkhoa'] ?> tại Phòng Khám Lộc Bình là đơn vị khám và điều trị hàng đầu, được trang bị hệ thống máy móc và thiết bị hiện đại. Với đội ngũ bác sĩ chuyên khoa có trình độ chuyên môn cao, giàu kinh nghiệm, chúng tôi cam kết mang đến cho bệnh nhân dịch vụ chăm sóc sức khỏe chất lượng cao.</p>
+                            <p>Chuyên khoa <?= $specialty['ten_chuyenkhoa'] ?> tại <?= htmlspecialchars($site_name) ?> là đơn vị khám và điều trị hàng đầu, được trang bị hệ thống máy móc và thiết bị hiện đại. Với đội ngũ bác sĩ chuyên khoa có trình độ chuyên môn cao, giàu kinh nghiệm, chúng tôi cam kết mang đến cho bệnh nhân dịch vụ chăm sóc sức khỏe chất lượng cao.</p>
                             <p>Mục tiêu của chúng tôi là giúp bệnh nhân phòng ngừa và điều trị hiệu quả các bệnh lý liên quan đến <?= strtolower($specialty['ten_chuyenkhoa']) ?>.</p>
                         <?php endif; ?>
                     </div>

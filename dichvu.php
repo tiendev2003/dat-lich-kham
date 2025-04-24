@@ -1,4 +1,8 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Dịch vụ y tế';
+require_once 'includes/functions.php';
+
 // Kết nối database
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
@@ -51,6 +55,11 @@ if ($services_result && $services_result->num_rows > 0) {
     }
 }
 
+// Lấy các thông số từ cài đặt
+$service_banner = get_setting('service_banner_image', '');
+$service_title = get_setting('service_title', 'Dịch vụ y tế');
+$service_subtitle = get_setting('service_subtitle', 'Chăm sóc sức khỏe toàn diện với đội ngũ bác sĩ chuyên nghiệp');
+
 // Helper function to format price
 function formatPrice($price) {
     return number_format($price, 0, ',', '.') . 'đ';
@@ -59,25 +68,18 @@ function formatPrice($price) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dịch vụ y tế - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/dichvu.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
     <!-- Banner Section -->
-    <div class="service-banner">
+    <div class="service-banner" <?php if (!empty($service_banner)): ?>style="background-image: url('<?php echo $service_banner; ?>');"<?php endif; ?>>
         <div class="container">
-            <h1 class="text-center">Dịch vụ y tế</h1>
-            <p class="text-center">Chăm sóc sức khỏe toàn diện với đội ngũ bác sĩ chuyên nghiệp</p>
+            <h1 class="text-center"><?php echo htmlspecialchars($service_title); ?></h1>
+            <p class="text-center"><?php echo htmlspecialchars($service_subtitle); ?></p>
         </div>
     </div>
 
@@ -114,10 +116,15 @@ function formatPrice($price) {
                                     // Default icons based on specialty if available
                                     $icon_class = 'fa-stethoscope';
                                     switch($service['chuyenkhoa_id']) {
-                                        case 1: $icon_class = 'fa-heart'; break; // Tim mạch
+                                        case 1: $icon_class = 'fa-heart-pulse'; break; // Tim mạch
                                         case 2: $icon_class = 'fa-baby'; break; // Nhi khoa
                                         case 3: $icon_class = 'fa-allergies'; break; // Da liễu
                                         case 5: $icon_class = 'fa-eye'; break; // Mắt
+                                        case 6: $icon_class = 'fa-tooth'; break; // Răng
+                                        case 7: $icon_class = 'fa-lungs'; break; // Hô hấp
+                                        case 8: $icon_class = 'fa-brain'; break; // Thần kinh
+                                        case 9: $icon_class = 'fa-bone'; break; // Xương khớp
+                                        case 10: $icon_class = 'fa-flask-vial'; break; // Xét nghiệm
                                         default: $icon_class = 'fa-stethoscope';
                                     }
                                     ?>
@@ -136,25 +143,25 @@ function formatPrice($price) {
                                     foreach ($features as $feature) {
                                         $feature = trim($feature);
                                         if (!empty($feature) && $count < 3) {
-                                            echo "<p><i class=\"fas fa-check\"></i> " . $feature . "</p>";
+                                            echo "<p><i class=\"fas fa-check-circle\"></i> " . $feature . "</p>";
                                             $count++;
                                         }
                                     }
                                 } else {
                                     // Default features
-                                    echo "<p><i class=\"fas fa-check\"></i> Dịch vụ chuyên nghiệp</p>";
-                                    echo "<p><i class=\"fas fa-check\"></i> Đội ngũ y bác sĩ giàu kinh nghiệm</p>";
-                                    echo "<p><i class=\"fas fa-check\"></i> Trang thiết bị hiện đại</p>";
+                                    echo "<p><i class=\"fas fa-check-circle\"></i> Dịch vụ chuyên nghiệp</p>";
+                                    echo "<p><i class=\"fas fa-check-circle\"></i> Đội ngũ y bác sĩ giàu kinh nghiệm</p>";
+                                    echo "<p><i class=\"fas fa-check-circle\"></i> Trang thiết bị hiện đại</p>";
                                 }
                                 ?>
                             </div>
                             
                             <div class="service-price">
-                                <span>Từ <?= formatPrice($service['gia_coban']) ?></span>
+                                <span><?= formatPrice($service['gia_coban']) ?></span>
                             </div>
                             
                             <a href="chitiet_dichvu.php?id=<?= $service['id'] ?>" class="btn btn-primary">
-                                Xem chi tiết
+                                <i class="fas fa-info-circle me-2"></i>Xem chi tiết
                             </a>
                         </div>
                     </div>
@@ -162,36 +169,64 @@ function formatPrice($price) {
                 <?php else: ?>
                     <div class="col-12 text-center py-5">
                         <div class="alert alert-info">
-                            Không tìm thấy dịch vụ phù hợp. Vui lòng thử lại với tiêu chí khác.
+                            <i class="fas fa-info-circle me-2"></i> Không tìm thấy dịch vụ phù hợp. Vui lòng thử lại với tiêu chí khác.
                         </div>
                     </div>
                 <?php endif; ?>
             </div>
             
             <!-- Pagination -->
-            <?php if ($total_pages > 1): ?>
-            <nav aria-label="Service pagination" class="my-4">
-                <ul class="pagination justify-content-center">
-                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= ($page-1) ?>&specialty=<?= $specialty_id ?>" aria-label="Previous">
-                            <span aria-hidden="true">&laquo;</span>
-                        </a>
-                    </li>
-                    
-                    <?php for($i = 1; $i <= $total_pages; $i++): ?>
-                        <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
-                            <a class="page-link" href="?page=<?= $i ?>&specialty=<?= $specialty_id ?>"><?= $i ?></a>
+            <div class="pagination-container mt-5">
+                <?php if ($total_pages > 1): ?>
+                <nav aria-label="Service pagination">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= ($page-1) ?><?= ($specialty_id > 0) ? '&specialty='.$specialty_id : '' ?>" aria-label="Previous">
+                                <span aria-hidden="true">&laquo;</span>
+                            </a>
                         </li>
-                    <?php endfor; ?>
-                    
-                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
-                        <a class="page-link" href="?page=<?= ($page+1) ?>&specialty=<?= $specialty_id ?>" aria-label="Next">
-                            <span aria-hidden="true">&raquo;</span>
-                        </a>
-                    </li>
-                </ul>
-            </nav>
-            <?php endif; ?>
+                        
+                        <?php
+                        // Show limited page numbers with ellipsis
+                        $start_page = max(1, $page - 2);
+                        $end_page = min($total_pages, $page + 2);
+                        
+                        // Show first page and ellipsis if needed
+                        if ($start_page > 1) {
+                            echo '<li class="page-item"><a class="page-link" href="?page=1' . (($specialty_id > 0) ? '&specialty='.$specialty_id : '') . '">1</a></li>';
+                            if ($start_page > 2) {
+                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+                        }
+                        
+                        // Show middle pages
+                        for($i = $start_page; $i <= $end_page; $i++): ?>
+                            <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                                <a class="page-link" href="?page=<?= $i ?><?= ($specialty_id > 0) ? '&specialty='.$specialty_id : '' ?>"><?= $i ?></a>
+                            </li>
+                        <?php endfor;
+                        
+                        // Show last page and ellipsis if needed
+                        if ($end_page < $total_pages) {
+                            if ($end_page < $total_pages - 1) {
+                                echo '<li class="page-item disabled"><span class="page-link">...</span></li>';
+                            }
+                            echo '<li class="page-item"><a class="page-link" href="?page=' . $total_pages . (($specialty_id > 0) ? '&specialty='.$specialty_id : '') . '">' . $total_pages . '</a></li>';
+                        }
+                        ?>
+                        
+                        <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                            <a class="page-link" href="?page=<?= ($page+1) ?><?= ($specialty_id > 0) ? '&specialty='.$specialty_id : '' ?>" aria-label="Next">
+                                <span aria-hidden="true">&raquo;</span>
+                            </a>
+                        </li>
+                    </ul>
+                </nav>
+                <div class="text-center mt-2 text-muted">
+                    <small>Hiển thị <?= count($services) ?> dịch vụ (trang <?= $page ?>/<?= $total_pages ?>)</small>
+                </div>
+                <?php endif; ?>
+            </div>
         </div>
     </div>
 

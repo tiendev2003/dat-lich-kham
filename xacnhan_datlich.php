@@ -3,23 +3,58 @@ session_start();
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
 
-if (!isset($_GET['ma_lichhen'])) {
+// Support both ID and ma_lichhen parameters
+if (isset($_GET['id'])) {
+    // Query by appointment ID
+    $appointment_id = $_GET['id'];
+    $stmt = $conn->prepare(
+        "SELECT l.*, bn.ho_ten AS bn_hoten, bn.dien_thoai AS bn_phone, b.ho_ten AS bs_hoten, ds.ten_dichvu, ds.gia_coban 
+         FROM lichhen l 
+         LEFT JOIN benhnhan bn ON l.benhnhan_id = bn.id 
+         LEFT JOIN bacsi b ON l.bacsi_id = b.id 
+         LEFT JOIN dichvu ds ON l.dichvu_id = ds.id 
+         WHERE l.id = ?"
+    );
+    $stmt->bind_param("i", $appointment_id);
+} elseif (isset($_GET['ma_lichhen'])) {
+    // Query by appointment code
+    $ma_lichhen = $_GET['ma_lichhen'];
+    $stmt = $conn->prepare(
+        "SELECT l.*, bn.ho_ten AS bn_hoten, bn.dien_thoai AS bn_phone, b.ho_ten AS bs_hoten, ds.ten_dichvu, ds.gia_coban 
+         FROM lichhen l 
+         LEFT JOIN benhnhan bn ON l.benhnhan_id = bn.id 
+         LEFT JOIN bacsi b ON l.bacsi_id = b.id 
+         LEFT JOIN dichvu ds ON l.dichvu_id = ds.id 
+         WHERE l.ma_lichhen = ?"
+    );
+    $stmt->bind_param("s", $ma_lichhen);
+} else {
+    // No parameters provided, redirect to home
     header('Location: index.php');
     exit;
 }
-$ma_lichhen = $_GET['ma_lichhen'];
-$stmt = $conn->prepare(
-    "SELECT l.*, bn.ho_ten AS bn_hoten, bn.dien_thoai AS bn_phone, b.ho_ten AS bs_hoten, ds.ten_dichvu, ds.gia_coban 
-     FROM lichhen l 
-     LEFT JOIN benhnhan bn ON l.benhnhan_id = bn.id 
-     LEFT JOIN bacsi b ON l.bacsi_id = b.id 
-     LEFT JOIN dichvu ds ON l.dichvu_id = ds.id 
-     WHERE l.ma_lichhen = ?"
-);
-$stmt->bind_param("s", $ma_lichhen);
+
 $stmt->execute();
 $res = $stmt->get_result();
+
+if ($res->num_rows === 0) {
+    // Appointment not found
+    $_SESSION['error_message'] = "Không tìm thấy thông tin lịch hẹn.";
+    header('Location: index.php');
+    exit;
+}
+
 $booking = $res->fetch_assoc();
+
+// Check permissions if logged in - only allow access to own appointments
+if (is_logged_in()) {
+    $patient = get_patient_info($_SESSION['user_id']);
+    if ($booking['benhnhan_id'] != $patient['id'] && !is_admin() && !is_doctor()) {
+        $_SESSION['error_message'] = "Bạn không có quyền xem thông tin lịch hẹn này.";
+        header('Location: user_profile.php');
+        exit;
+    }
+}
 
 $ngay = date('l, d/m/Y', strtotime($booking['ngay_hen']));
 $gio = date('H:i', strtotime($booking['gio_hen']));

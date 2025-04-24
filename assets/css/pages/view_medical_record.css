@@ -1,0 +1,60 @@
+/* CSS cho trang xem chi tiết hồ sơ y tế */
+.medical-record-header {
+    background-color: #f8f9fa;
+    border-left: 4px solid #0d6efd;
+}
+
+.card-header.bg-light {
+    background-color: #f8f9fa !important;
+    border-bottom: 1px solid #e0e0e0;
+}
+
+.card-header .card-title {
+    font-size: 1.1rem;
+    font-weight: 600;
+    color: #333;
+    margin: 0;
+}
+
+.table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+}
+
+table.table-bordered {
+    border-color: #dee2e6;
+}
+
+.table-striped tbody tr:nth-of-type(odd) {
+    background-color: rgba(0, 0, 0, 0.02);
+}
+
+.table-primary {
+    background-color: #cfe2ff;
+    color: #084298;
+}
+
+.bg-light-subtle {
+    background-color: #f8f9fa;
+}
+
+/* Responsive design */
+@media (max-width: 767.98px) {
+    .medical-record-header .row {
+        flex-direction: column;
+    }
+    
+    .col-md-7.text-md-end {
+        text-align: left !important;
+        margin-top: 1rem;
+    }
+    
+    .card-footer .d-flex {
+        flex-direction: column;
+    }
+    
+    .card-footer .btn {
+        width: 100%;
+        margin-bottom: 0.5rem;
+    }
+}

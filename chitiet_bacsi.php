@@ -1,11 +1,13 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
 // Start the session before any output
 session_start();
 
-// Kết nối database
+// Kết nối database và load functions
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
 require_once 'admin/crud/tintuc_crud.php';
+require_once 'includes/functions.php';
 
 // Lấy ID bác sĩ từ tham số URL
 $doctor_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -29,6 +31,12 @@ if (!$doctor_result || $doctor_result->num_rows == 0) {
 }
 
 $doctor = $doctor_result->fetch_assoc();
+
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = $doctor['ho_ten'];
+
+// Lấy thông số từ cài đặt
+$site_name = get_setting('site_name', 'Phòng Khám Lộc Bình');
 
 // Lấy các bài viết của bác sĩ (nếu có liên kết với người dùng)
 $articles = [];
@@ -109,15 +117,8 @@ function calculateAge($birth_year) {
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $doctor['ho_ten'] ?> - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/doctors.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         .doctor-profile {
             padding: 40px 0;
@@ -136,7 +137,7 @@ function calculateAge($birth_year) {
             position: absolute;
             bottom: -15px;
             right: 20px;
-            background-color: #0d6efd;
+            background-color: var(--primary-color);
             color: white;
             padding: 5px 15px;
             border-radius: 30px;
@@ -172,7 +173,7 @@ function calculateAge($birth_year) {
             top: 8px;
             height: calc(100% - 8px);
             width: 3px;
-            background-color: #0d6efd;
+            background-color: var(--primary-color);
             border-radius: 5px;
         }
         .contact-info-item {
@@ -184,11 +185,11 @@ function calculateAge($birth_year) {
             width: 40px;
             height: 40px;
             border-radius: 50%;
-            background-color: rgba(13, 110, 253, 0.1);
+            background-color: rgba(var(--primary-color-rgb), 0.1);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #0d6efd;
+            color: var(--primary-color);
             margin-right: 15px;
         }
         .contact-info-text {
@@ -208,7 +209,7 @@ function calculateAge($birth_year) {
         .doctor-stat-number {
             font-size: 24px;
             font-weight: 700;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         .doctor-stat-label {
             font-size: 14px;
@@ -286,6 +287,15 @@ function calculateAge($birth_year) {
             justify-content: center;
             margin-top: 30px;
         }
+        :root {
+            --primary-color-rgb: <?php 
+                $hex = ltrim(get_setting('primary_color', '#005bac'), '#');
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                echo "$r,$g,$b";
+            ?>;
+        }
     </style>
 </head>
 <body>
@@ -339,7 +349,7 @@ function calculateAge($birth_year) {
                         <div class="contact-info-icon">
                             <i class="fas fa-hospital"></i>
                         </div>
-                        <div class="contact-info-text">Phòng khám Lộc Bình</div>
+                        <div class="contact-info-text"><?php echo htmlspecialchars($site_name); ?></div>
                     </div>
 
                     <?php if(!empty($doctor['dia_chi'])): ?>

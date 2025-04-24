@@ -21,14 +21,14 @@ if (!is_logged_in()) {
     if (!empty($_POST['address'])) {
         $addr_parts[] = trim($_POST['address']);
     }
-    if (!empty($_POST['ward'])) {
-        $addr_parts[] = 'Phường/Xã: ' . $_POST['ward'];
+    if (!empty($_POST['ward_text'])) {
+        $addr_parts[] = 'Phường/Xã: ' . trim($_POST['ward_text']);
     }
-    if (!empty($_POST['district'])) {
-        $addr_parts[] = 'Quận/Huyện: ' . $_POST['district'];
+    if (!empty($_POST['district_text'])) {
+        $addr_parts[] = 'Quận/Huyện: ' . trim($_POST['district_text']);
     }
-    if (!empty($_POST['province'])) {
-        $addr_parts[] = 'Tỉnh/Thành: ' . $_POST['province'];
+    if (!empty($_POST['province_text'])) {
+        $addr_parts[] = 'Tỉnh/Thành: ' . trim($_POST['province_text']);
     }
     $address = implode(', ', $addr_parts);
     
@@ -51,14 +51,14 @@ $addr_parts = [];
 if (!empty($_POST['address'])) {
     $addr_parts[] = trim($_POST['address']);
 }
-if (!empty($_POST['ward'])) {
-    $addr_parts[] = 'Phường/Xã: ' . trim($_POST['ward']);
+if (!empty($_POST['ward_text'])) {
+    $addr_parts[] = 'Phường/Xã: ' . trim($_POST['ward_text']);
 }
-if (!empty($_POST['district'])) {
-    $addr_parts[] = 'Quận/Huyện: ' . trim($_POST['district']);
+if (!empty($_POST['district_text'])) {
+    $addr_parts[] = 'Quận/Huyện: ' . trim($_POST['district_text']);
 }
-if (!empty($_POST['province'])) {
-    $addr_parts[] = 'Tỉnh/Thành: ' . trim($_POST['province']);
+if (!empty($_POST['province_text'])) {
+    $addr_parts[] = 'Tỉnh/Thành: ' . trim($_POST['province_text']);
 }
 $address = implode(', ', $addr_parts);
 

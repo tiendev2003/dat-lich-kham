@@ -4,13 +4,53 @@ if (session_status() === PHP_SESSION_NONE) {
     session_start();
 }
 $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế của dự án của bạn
+require_once 'functions.php';
+
+// Lấy các thông số cài đặt
+$site_name = get_setting('site_name', 'Phòng Khám Lộc Bình');
+$primary_color = get_setting('primary_color', '#005bac');
+$header_bg_color = get_setting('header_bg_color', '#ffffff');
+
+// Tạo CSS custom từ cài đặt
+$custom_css = "
+<style>
+    :root {
+        --primary-color: {$primary_color};
+        --secondary-color: " . get_setting('secondary_color', '#6c757d') . ";
+        --accent-color: " . get_setting('accent_color', '#28a745') . ";
+    }
+    .navbar-brand {
+        color: var(--primary-color) !important;
+    }
+    .btn-primary, .bg-primary {
+        background-color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+    .btn-outline-primary {
+        color: var(--primary-color) !important;
+        border-color: var(--primary-color) !important;
+    }
+    .btn-outline-primary:hover {
+        background-color: var(--primary-color) !important;
+        color: white !important;
+    }
+    .text-primary {
+        color: var(--primary-color) !important;
+    }
+    /* Các biến CSS và tùy chỉnh khác từ cài đặt */
+</style>
+";
 
 ?>
+<?php echo $custom_css; ?>
 <header class="header">
-    <nav class="navbar navbar-expand-lg navbar-light bg-white shadow-sm">
+    <nav class="navbar navbar-expand-lg navbar-light shadow-sm" style="background-color: <?php echo $header_bg_color; ?>">
         <div class="container">
-            <a class="navbar-brand" href="index.php" style="font-size: 20px; font-weight: bold; color: #005bac;">
-                Phòng Khám Lộc Bình
+            <a class="navbar-brand" href="index.php" style="font-size: 20px; font-weight: bold;">
+                <?php 
+                    echo $site_name;
+                    
+                ?>
             </a>
 
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
@@ -49,6 +89,9 @@ $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế c
                     <li class="nav-item">
                         <a class="nav-link" href="tintuc.php">Tin tức</a>
                     </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="tracuu.php">Tra cứu</a>
+                    </li>
                     <li class="nav-item dropdown">
                         <a class="nav-link dropdown-toggle" href="#" id="thongTinDropdown" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                             Thông tin
@@ -69,6 +112,7 @@ $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế c
                             <ul class="dropdown-menu">
                                 <li><a class="dropdown-item" href="user_profile.php">Thông tin cá nhân</a></li>
                                 <li><a class="dropdown-item" href="lichsu_datlich.php">Lịch sử đặt khám</a></li>
+                                <li><a class="dropdown-item" href="medical_records.php">Hồ sơ y tế</a></li>
                                 <li><hr class="dropdown-divider"></li>
                                 <li><a class="dropdown-item" href="logout.php">Đăng xuất</a></li>
                             </ul>

@@ -1,4 +1,7 @@
 <?php
+// Kiểm tra quyền truy cập
+require_once 'includes/auth_check.php';
+
 // Kết nối đến cơ sở dữ liệu
 require_once 'includes/db_connect.php';
 
@@ -52,7 +55,7 @@ foreach ($all_news as $news_item) {
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Quản lý Tin tức - Quản trị hệ thống</title>
+    <title>Quản lý Tin tức - Phòng khám Lộc Bình</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -200,100 +203,100 @@ foreach ($all_news as $news_item) {
         .filter-section {
             margin-bottom: 20px;
         }
-        
+
         /* Responsive styles */
         @media (max-width: 992px) {
             .stats-card {
                 padding: 12px;
             }
-            
+
             .stats-icon {
                 width: 40px;
                 height: 40px;
                 font-size: 18px;
             }
-            
+
             .stats-info h3 {
                 font-size: 18px;
             }
-            
+
             .stats-info p {
                 font-size: 12px;
             }
         }
-        
+
         @media (max-width: 768px) {
             .content-header {
                 flex-direction: column;
                 gap: 10px;
                 align-items: flex-start;
             }
-            
+
             .content-header h2 {
                 margin-bottom: 10px;
             }
-            
+
             .row.mb-4 {
                 margin-right: -10px;
                 margin-left: -10px;
             }
-            
+
             .col-md-3 {
                 padding-right: 10px;
                 padding-left: 10px;
             }
-            
+
             .filter-section .row {
                 gap: 8px;
             }
-            
+
             .filter-section .col-md-4,
             .filter-section .col-md-3,
             .filter-section .col-md-5 {
                 padding: 0 5px;
             }
-            
+
             .news-card {
                 margin-bottom: 15px;
             }
-            
+
             .news-image {
                 height: 140px;
             }
         }
-        
+
         @media (max-width: 576px) {
             .stats-card {
                 flex-direction: column;
                 text-align: center;
                 padding: 15px 10px;
             }
-            
+
             .stats-icon {
                 margin-right: 0;
                 margin-bottom: 10px;
             }
-            
+
             .news-actions {
                 flex-direction: column;
                 gap: 10px;
                 align-items: flex-start;
             }
-            
+
             .news-actions div:last-child {
                 width: 100%;
                 display: flex;
                 justify-content: space-between;
             }
-            
+
             .modal-dialog {
                 margin: 0.5rem;
             }
-            
+
             .modal-content {
                 border-radius: 0;
             }
-            
+
             .summernote-wrapper .note-toolbar {
                 flex-wrap: wrap;
             }
@@ -308,254 +311,263 @@ foreach ($all_news as $news_item) {
             <?php include 'includes/sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-12 main-content">
-                <div class="content-header">
-                    <h2>Quản lý Tin tức</h2>
-                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNewsModal">
-                        <i class="fas fa-plus"></i> Thêm bài viết mới
-                    </button>
-                </div>
+            <div class="col-md-12 main-content  mt-5 ">
+                <div class="content-wrapper">
 
-                <!-- Stats Cards -->
-                <div class="row mb-4">
-                    <div class="col-md-3">
-                        <div class="stats-card bg-primary text-white">
-                            <div class="stats-icon">
-                                <i class="fas fa-newspaper"></i>
-                            </div>
-                            <div class="stats-info">
-                                <h3><?php echo $total_news; ?></h3>
-                                <p>Tổng số bài viết</p>
-                            </div>
-                        </div>
+                    <div class="content-header">
+                        <h2>Quản lý Tin tức</h2>
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addNewsModal">
+                            <i class="fas fa-plus"></i> Thêm bài viết mới
+                        </button>
                     </div>
-                    <div class="col-md-3">
-                        <div class="stats-card bg-success text-white">
-                            <div class="stats-icon">
-                                <i class="fas fa-check-circle"></i>
-                            </div>
-                            <div class="stats-info">
-                                <h3><?php echo $published_count; ?></h3>
-                                <p>Đã xuất bản</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card bg-warning text-white">
-                            <div class="stats-icon">
-                                <i class="fas fa-clock"></i>
-                            </div>
-                            <div class="stats-info">
-                                <h3><?php echo $draft_count; ?></h3>
-                                <p>Bản nháp</p>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="col-md-3">
-                        <div class="stats-card bg-info text-white">
-                            <div class="stats-icon">
-                                <i class="fas fa-calendar-alt"></i>
-                            </div>
-                            <div class="stats-info">
-                                <h3><?php echo $scheduled_count; ?></h3>
-                                <p>Lên lịch đăng</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Filter Section -->
-                <div class="filter-section">
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-md-3">
+                            <div class="stats-card bg-primary text-white">
+                                <div class="stats-icon">
+                                    <i class="fas fa-newspaper"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo $total_news; ?></h3>
+                                    <p>Tổng số bài viết</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-success text-white">
+                                <div class="stats-icon">
+                                    <i class="fas fa-check-circle"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo $published_count; ?></h3>
+                                    <p>Đã xuất bản</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-warning text-white">
+                                <div class="stats-icon">
+                                    <i class="fas fa-clock"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo $draft_count; ?></h3>
+                                    <p>Bản nháp</p>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="col-md-3">
+                            <div class="stats-card bg-info text-white">
+                                <div class="stats-icon">
+                                    <i class="fas fa-calendar-alt"></i>
+                                </div>
+                                <div class="stats-info">
+                                    <h3><?php echo $scheduled_count; ?></h3>
+                                    <p>Lên lịch đăng</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Filter Section -->
+                    <div class="filter-section">
+                        <div class="row">
+                            <form action="" method="GET" class="row">
+                                <div class="col-md-4 mb-2">
+                                    <select class="form-select" id="categoryFilter" name="category">
+                                        <option value="">Tất cả danh mục</option>
+                                        <option value="health" <?php echo $category == 'health' ? 'selected' : ''; ?>>Sức
+                                            khỏe
+                                        </option>
+                                        <option value="nutrition" <?php echo $category == 'nutrition' ? 'selected' : ''; ?>>
+                                            Dinh dưỡng</option>
+                                        <option value="medicine" <?php echo $category == 'medicine' ? 'selected' : ''; ?>>
+                                            Y
+                                            học</option>
+                                        <option value="lifestyle" <?php echo $category == 'lifestyle' ? 'selected' : ''; ?>>
+                                            Lối sống</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3 mb-2">
+                                    <select class="form-select" id="statusFilter" name="status">
+                                        <option value="">Tất cả trạng thái</option>
+                                        <option value="published" <?php echo $status == 'published' ? 'selected' : ''; ?>>
+                                            Đã
+                                            xuất bản</option>
+                                        <option value="draft" <?php echo $status == 'draft' ? 'selected' : ''; ?>>Bản nháp
+                                        </option>
+                                        <option value="scheduled" <?php echo $status == 'scheduled' ? 'selected' : ''; ?>>
+                                            Lên
+                                            lịch</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-5 mb-2">
+                                    <div class="input-group">
+                                        <input type="text" class="form-control" name="search"
+                                            placeholder="Tìm kiếm bài viết..."
+                                            value="<?php echo htmlspecialchars($search); ?>">
+                                        <button class="btn btn-outline-secondary" type="submit">
+                                            <i class="fas fa-search"></i>
+                                        </button>
+                                    </div>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+
+                    <!-- News List -->
                     <div class="row">
-                        <form action="" method="GET" class="row">
-                            <div class="col-md-4 mb-2">
-                                <select class="form-select" id="categoryFilter" name="category">
-                                    <option value="">Tất cả danh mục</option>
-                                    <option value="health" <?php echo $category == 'health' ? 'selected' : ''; ?>>Sức khỏe
-                                    </option>
-                                    <option value="nutrition" <?php echo $category == 'nutrition' ? 'selected' : ''; ?>>
-                                        Dinh dưỡng</option>
-                                    <option value="medicine" <?php echo $category == 'medicine' ? 'selected' : ''; ?>>Y
-                                        học</option>
-                                    <option value="lifestyle" <?php echo $category == 'lifestyle' ? 'selected' : ''; ?>>
-                                        Lối sống</option>
-                                </select>
-                            </div>
-                            <div class="col-md-3 mb-2">
-                                <select class="form-select" id="statusFilter" name="status">
-                                    <option value="">Tất cả trạng thái</option>
-                                    <option value="published" <?php echo $status == 'published' ? 'selected' : ''; ?>>Đã
-                                        xuất bản</option>
-                                    <option value="draft" <?php echo $status == 'draft' ? 'selected' : ''; ?>>Bản nháp
-                                    </option>
-                                    <option value="scheduled" <?php echo $status == 'scheduled' ? 'selected' : ''; ?>>Lên
-                                        lịch</option>
-                                </select>
-                            </div>
-                            <div class="col-md-5 mb-2">
-                                <div class="input-group">
-                                    <input type="text" class="form-control" name="search"
-                                        placeholder="Tìm kiếm bài viết..."
-                                        value="<?php echo htmlspecialchars($search); ?>">
-                                    <button class="btn btn-outline-secondary" type="submit">
-                                        <i class="fas fa-search"></i>
-                                    </button>
+                        <?php if (count($news_list) > 0): ?>
+                            <?php foreach ($news_list as $news): ?>
+                                <div class="col-md-4 col-sm-6">
+                                    <div class="news-card">
+                                        <div class="news-image">
+                                            <?php if (!empty($news['hinh_anh'])): ?>
+                                                <img src="../<?php echo htmlspecialchars($news['hinh_anh']); ?>"
+                                                    alt="<?php echo htmlspecialchars($news['tieu_de']); ?>">
+                                            <?php else: ?>
+                                                <img src="../assets/img/blog-1.png" alt="Default Image">
+                                            <?php endif; ?>
+                                        </div>
+                                        <div class="news-content">
+                                            <div class="news-date">
+                                                <i class="far fa-calendar-alt"></i>
+                                                <?php
+                                                if ($news['trang_thai'] == 'published' && !empty($news['ngay_dang'])) {
+                                                    echo date('d/m/Y', strtotime($news['ngay_dang']));
+                                                } elseif ($news['trang_thai'] == 'scheduled' && !empty($news['ngay_dang'])) {
+                                                    echo 'Lên lịch: ' . date('d/m/Y', strtotime($news['ngay_dang']));
+                                                } else {
+                                                    echo date('d/m/Y', strtotime($news['ngay_tao']));
+                                                }
+                                                ?>
+                                            </div>
+                                            <h5 class="news-title"><?php echo htmlspecialchars($news['tieu_de']); ?></h5>
+                                            <div>
+                                                <span
+                                                    class="news-category category-<?php echo htmlspecialchars($news['danh_muc']); ?>">
+                                                    <?php
+                                                    switch ($news['danh_muc']) {
+                                                        case 'health':
+                                                            echo 'Sức khỏe';
+                                                            break;
+                                                        case 'nutrition':
+                                                            echo 'Dinh dưỡng';
+                                                            break;
+                                                        case 'medicine':
+                                                            echo 'Y học';
+                                                            break;
+                                                        case 'lifestyle':
+                                                            echo 'Lối sống';
+                                                            break;
+                                                        default:
+                                                            echo $news['danh_muc'];
+                                                    }
+                                                    ?>
+                                                </span>
+                                                <span
+                                                    class="news-status badge badge-<?php echo $news['trang_thai']; ?> text-white">
+                                                    <?php
+                                                    switch ($news['trang_thai']) {
+                                                        case 'published':
+                                                            echo 'Đã xuất bản';
+                                                            break;
+                                                        case 'draft':
+                                                            echo 'Bản nháp';
+                                                            break;
+                                                        case 'scheduled':
+                                                            echo 'Lên lịch';
+                                                            break;
+                                                    }
+                                                    ?>
+                                                </span>
+                                            </div>
+                                            <div class="news-actions mt-2">
+                                                <div>
+                                                    <?php if ($news['trang_thai'] == 'published'): ?>
+                                                        <i class="far fa-eye"></i> <?php echo rand(100, 9999); ?>
+                                                    <?php elseif ($news['trang_thai'] == 'scheduled'): ?>
+                                                        <i class="fas fa-clock"></i>
+                                                        <?php echo date('d/m/Y', strtotime($news['ngay_dang'])); ?>
+                                                    <?php else: ?>
+                                                        <i class="fas fa-pencil-alt"></i> Đang soạn
+                                                    <?php endif; ?>
+                                                </div>
+                                                <div>
+                                                    <a href="#" class="btn btn-sm btn-outline-primary me-1 edit-news-btn"
+                                                        data-bs-toggle="modal" data-bs-target="#editNewsModal"
+                                                        data-id="<?php echo $news['id']; ?>">
+                                                        <i class="fas fa-edit"></i>
+                                                    </a>
+                                                    <a href="#" class="btn btn-sm btn-outline-danger delete-news-btn"
+                                                        data-id="<?php echo $news['id']; ?>"
+                                                        data-title="<?php echo htmlspecialchars($news['tieu_de']); ?>">
+                                                        <i class="fas fa-trash"></i>
+                                                    </a>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            <?php endforeach; ?>
+                        <?php else: ?>
+                            <div class="col-12">
+                                <div class="alert alert-info">
+                                    <?php if (!empty($search) || !empty($category) || !empty($status)): ?>
+                                        Không tìm thấy tin tức nào phù hợp với bộ lọc. <a href="tintuc.php">Xem tất cả tin
+                                            tức</a>
+                                    <?php else: ?>
+                                        Chưa có tin tức nào. Hãy thêm tin tức mới!
+                                    <?php endif; ?>
                                 </div>
                             </div>
-                        </form>
+                        <?php endif; ?>
                     </div>
-                </div>
 
-                <!-- News List -->
-                <div class="row">
-                    <?php if (count($news_list) > 0): ?>
-                        <?php foreach ($news_list as $news): ?>
-                            <div class="col-md-4 col-sm-6">
-                                <div class="news-card">
-                                    <div class="news-image">
-                                        <?php if (!empty($news['hinh_anh'])): ?>
-                                            <img src="../<?php echo htmlspecialchars($news['hinh_anh']); ?>"
-                                                alt="<?php echo htmlspecialchars($news['tieu_de']); ?>">
-                                        <?php else: ?>
-                                            <img src="../assets/img/blog-1.png" alt="Default Image">
-                                        <?php endif; ?>
-                                    </div>
-                                    <div class="news-content">
-                                        <div class="news-date">
-                                            <i class="far fa-calendar-alt"></i>
-                                            <?php
-                                            if ($news['trang_thai'] == 'published' && !empty($news['ngay_dang'])) {
-                                                echo date('d/m/Y', strtotime($news['ngay_dang']));
-                                            } elseif ($news['trang_thai'] == 'scheduled' && !empty($news['ngay_dang'])) {
-                                                echo 'Lên lịch: ' . date('d/m/Y', strtotime($news['ngay_dang']));
-                                            } else {
-                                                echo date('d/m/Y', strtotime($news['ngay_tao']));
-                                            }
-                                            ?>
-                                        </div>
-                                        <h5 class="news-title"><?php echo htmlspecialchars($news['tieu_de']); ?></h5>
-                                        <div>
-                                            <span
-                                                class="news-category category-<?php echo htmlspecialchars($news['danh_muc']); ?>">
-                                                <?php
-                                                switch ($news['danh_muc']) {
-                                                    case 'health':
-                                                        echo 'Sức khỏe';
-                                                        break;
-                                                    case 'nutrition':
-                                                        echo 'Dinh dưỡng';
-                                                        break;
-                                                    case 'medicine':
-                                                        echo 'Y học';
-                                                        break;
-                                                    case 'lifestyle':
-                                                        echo 'Lối sống';
-                                                        break;
-                                                    default:
-                                                        echo $news['danh_muc'];
-                                                }
-                                                ?>
-                                            </span>
-                                            <span class="news-status badge badge-<?php echo $news['trang_thai']; ?> text-white">
-                                                <?php
-                                                switch ($news['trang_thai']) {
-                                                    case 'published':
-                                                        echo 'Đã xuất bản';
-                                                        break;
-                                                    case 'draft':
-                                                        echo 'Bản nháp';
-                                                        break;
-                                                    case 'scheduled':
-                                                        echo 'Lên lịch';
-                                                        break;
-                                                }
-                                                ?>
-                                            </span>
-                                        </div>
-                                        <div class="news-actions mt-2">
-                                            <div>
-                                                <?php if ($news['trang_thai'] == 'published'): ?>
-                                                    <i class="far fa-eye"></i> <?php echo rand(100, 9999); ?>
-                                                <?php elseif ($news['trang_thai'] == 'scheduled'): ?>
-                                                    <i class="fas fa-clock"></i>
-                                                    <?php echo date('d/m/Y', strtotime($news['ngay_dang'])); ?>
-                                                <?php else: ?>
-                                                    <i class="fas fa-pencil-alt"></i> Đang soạn
-                                                <?php endif; ?>
-                                            </div>
-                                            <div>
-                                                <a href="#" class="btn btn-sm btn-outline-primary me-1 edit-news-btn"
-                                                    data-bs-toggle="modal" data-bs-target="#editNewsModal"
-                                                    data-id="<?php echo $news['id']; ?>">
-                                                    <i class="fas fa-edit"></i>
-                                                </a>
-                                                <a href="#" class="btn btn-sm btn-outline-danger delete-news-btn"
-                                                    data-id="<?php echo $news['id']; ?>"
-                                                    data-title="<?php echo htmlspecialchars($news['tieu_de']); ?>">
-                                                    <i class="fas fa-trash"></i>
-                                                </a>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
-                        <?php endforeach; ?>
-                    <?php else: ?>
-                        <div class="col-12">
-                            <div class="alert alert-info">
-                                <?php if (!empty($search) || !empty($category) || !empty($status)): ?>
-                                    Không tìm thấy tin tức nào phù hợp với bộ lọc. <a href="tintuc.php">Xem tất cả tin tức</a>
+                    <!-- Pagination -->
+                    <?php if ($total_pages > 1): ?>
+                        <nav aria-label="Page navigation" class="mt-4">
+                            <ul class="pagination justify-content-center">
+                                <?php if ($current_page > 1): ?>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $current_page - 1; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>"
+                                            aria-label="Previous">
+                                            <span aria-hidden="true">Trước</span>
+                                        </a>
+                                    </li>
                                 <?php else: ?>
-                                    Chưa có tin tức nào. Hãy thêm tin tức mới!
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
+                                    </li>
                                 <?php endif; ?>
-                            </div>
-                        </div>
+
+                                <?php for ($i = 1; $i <= $total_pages; $i++): ?>
+                                    <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $i; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>">
+                                            <?php echo $i; ?>
+                                        </a>
+                                    </li>
+                                <?php endfor; ?>
+
+                                <?php if ($current_page < $total_pages): ?>
+                                    <li class="page-item">
+                                        <a class="page-link"
+                                            href="?page=<?php echo $current_page + 1; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>"
+                                            aria-label="Next">
+                                            <span aria-hidden="true">Sau</span>
+                                        </a>
+                                    </li>
+                                <?php else: ?>
+                                    <li class="page-item disabled">
+                                        <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Sau</a>
+                                    </li>
+                                <?php endif; ?>
+                            </ul>
+                        </nav>
                     <?php endif; ?>
                 </div>
-
-                <!-- Pagination -->
-                <?php if ($total_pages > 1): ?>
-                    <nav aria-label="Page navigation" class="mt-4">
-                        <ul class="pagination justify-content-center">
-                            <?php if ($current_page > 1): ?>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="?page=<?php echo $current_page - 1; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>"
-                                        aria-label="Previous">
-                                        <span aria-hidden="true">Trước</span>
-                                    </a>
-                                </li>
-                            <?php else: ?>
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Trước</a>
-                                </li>
-                            <?php endif; ?>
-
-                            <?php for ($i = 1; $i <= $total_pages; $i++): ?>
-                                <li class="page-item <?php echo $i == $current_page ? 'active' : ''; ?>">
-                                    <a class="page-link"
-                                        href="?page=<?php echo $i; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>">
-                                        <?php echo $i; ?>
-                                    </a>
-                                </li>
-                            <?php endfor; ?>
-
-                            <?php if ($current_page < $total_pages): ?>
-                                <li class="page-item">
-                                    <a class="page-link"
-                                        href="?page=<?php echo $current_page + 1; ?><?php echo !empty($category) ? '&category=' . $category : ''; ?><?php echo !empty($status) ? '&status=' . $status : ''; ?><?php echo !empty($search) ? '&search=' . htmlspecialchars($search) : ''; ?>"
-                                        aria-label="Next">
-                                        <span aria-hidden="true">Sau</span>
-                                    </a>
-                                </li>
-                            <?php else: ?>
-                                <li class="page-item disabled">
-                                    <a class="page-link" href="#" tabindex="-1" aria-disabled="true">Sau</a>
-                                </li>
-                            <?php endif; ?>
-                        </ul>
-                    </nav>
-                <?php endif; ?>
             </div>
         </div>
     </div>
@@ -568,7 +580,8 @@ foreach ($all_news as $news_item) {
                     <?php $modal_title = "Thêm bài viết mới"; ?>
                     <?php include 'modals/mobile_header.php'; ?>
                     <h5 class="modal-title d-none d-md-block" id="addNewsModalLabel">Thêm bài viết mới</h5>
-                    <button type="button" class="btn-close d-none d-md-block" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close d-none d-md-block" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="addNewsForm" enctype="multipart/form-data">
@@ -648,7 +661,8 @@ foreach ($all_news as $news_item) {
                     <?php $modal_title = "Chỉnh sửa bài viết"; ?>
                     <?php include 'modals/mobile_header.php'; ?>
                     <h5 class="modal-title d-none d-md-block" id="editNewsModalLabel">Chỉnh sửa bài viết</h5>
-                    <button type="button" class="btn-close d-none d-md-block" data-bs-dismiss="modal" aria-label="Close"></button>
+                    <button type="button" class="btn-close d-none d-md-block" data-bs-dismiss="modal"
+                        aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
                     <form id="editNewsForm" enctype="multipart/form-data">

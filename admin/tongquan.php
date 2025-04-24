@@ -1,13 +1,11 @@
 <?php
+// Kiểm tra quyền truy cập
+require_once 'includes/auth_check.php';
+
 // Kết nối đến cơ sở dữ liệu
 require_once 'includes/db_connect.php';
 
 // Lấy số liệu thống kê cho trang tổng quan
-// Lịch hẹn hôm nay
-$sql_today = "SELECT COUNT(*) as count FROM lichhen WHERE DATE(ngay_hen) = CURDATE()";
-$result_today = $conn->query($sql_today);
-$appointments_today = $result_today->fetch_assoc()['count'];
-
 // Tổng số bác sĩ
 $sql_doctors = "SELECT COUNT(*) as count FROM bacsi";
 $result_doctors = $conn->query($sql_doctors);
@@ -18,65 +16,62 @@ $sql_patients = "SELECT COUNT(*) as count FROM benhnhan";
 $result_patients = $conn->query($sql_patients);
 $total_patients = $result_patients->fetch_assoc()['count'];
 
-// Lịch hẹn chờ xác nhận
-$sql_pending = "SELECT COUNT(*) as count FROM lichhen WHERE trang_thai = 'pending'";
-$result_pending = $conn->query($sql_pending);
-$pending_appointments = $result_pending->fetch_assoc()['count'];
+// Tổng số chuyên khoa
+$sql_specialties = "SELECT COUNT(*) as count FROM chuyenkhoa";
+$result_specialties = $conn->query($sql_specialties);
+$total_specialties = $result_specialties->fetch_assoc()['count'];
 
-// Lấy dữ liệu thống kê lịch hẹn theo tháng
-$sql_monthly = "SELECT MONTH(ngay_hen) as month, COUNT(*) as count 
-                FROM lichhen 
-                WHERE YEAR(ngay_hen) = YEAR(CURDATE()) 
-                GROUP BY MONTH(ngay_hen)
-                ORDER BY MONTH(ngay_hen)";
-$result_monthly = $conn->query($sql_monthly);
-$monthly_data = [];
-while ($row = $result_monthly->fetch_assoc()) {
-    $monthly_data[$row['month']] = $row['count'];
-}
+// Tổng số dịch vụ
+$sql_services = "SELECT COUNT(*) as count FROM dichvu";
+$result_services = $conn->query($sql_services);
+$total_services = $result_services->fetch_assoc()['count'];
 
-// Lấp đầy các tháng không có dữ liệu
-for ($i = 1; $i <= 12; $i++) {
-    if (!isset($monthly_data[$i])) {
-        $monthly_data[$i] = 0;
-    }
-}
-ksort($monthly_data); // Sắp xếp theo key
-
-// Lấy dữ liệu phân bố theo chuyên khoa
-$sql_specialty = "SELECT ck.ten_chuyenkhoa, COUNT(lh.id) as count 
-                  FROM lichhen lh
-                  LEFT JOIN bacsi bs ON lh.bacsi_id = bs.id
-                  LEFT JOIN chuyenkhoa ck ON bs.chuyenkhoa_id = ck.id
-                  GROUP BY ck.id";
-$result_specialty = $conn->query($sql_specialty);
+// Lấy dữ liệu thống kê bác sĩ theo chuyên khoa
+$sql_by_specialty = "SELECT ck.ten_chuyenkhoa, COUNT(bs.id) as count 
+                 FROM bacsi bs 
+                 JOIN chuyenkhoa ck ON bs.chuyenkhoa_id = ck.id 
+                 GROUP BY ck.id";
+$result_by_specialty = $conn->query($sql_by_specialty);
 $specialty_labels = [];
 $specialty_data = [];
-while ($row = $result_specialty->fetch_assoc()) {
-    $specialty_labels[] = $row['ten_chuyenkhoa'] ?? 'Không xác định';
+while ($row = $result_by_specialty->fetch_assoc()) {
+    $specialty_labels[] = $row['ten_chuyenkhoa'];
     $specialty_data[] = $row['count'];
 }
 
-// Lấy danh sách lịch hẹn gần đây
-$sql_recent = "SELECT lh.id, lh.ma_lichhen, bn.ho_ten as ten_benhnhan, bs.ho_ten as ten_bacsi,
-              lh.ngay_hen, lh.gio_hen, lh.trang_thai
-              FROM lichhen lh
-              LEFT JOIN benhnhan bn ON lh.benhnhan_id = bn.id
-              LEFT JOIN bacsi bs ON lh.bacsi_id = bs.id
-              ORDER BY lh.ngay_tao DESC
-              LIMIT 5";
-$result_recent = $conn->query($sql_recent);
-$recent_appointments = [];
-while ($row = $result_recent->fetch_assoc()) {
-    $recent_appointments[] = $row;
+// Lấy dữ liệu thống kê bệnh nhân theo giới tính
+$sql_gender = "SELECT gioi_tinh, COUNT(*) as count FROM benhnhan GROUP BY gioi_tinh";
+$result_gender = $conn->query($sql_gender);
+$gender_data = [0, 0, 0]; // Nam, Nữ, Khác
+while ($row = $result_gender->fetch_assoc()) {
+    if (strtolower($row['gioi_tinh']) == 'nam') {
+        $gender_data[0] = $row['count'];
+    } elseif (strtolower($row['gioi_tinh']) == 'nữ' || strtolower($row['gioi_tinh']) == 'nu') {
+        $gender_data[1] = $row['count'];
+    } else {
+        $gender_data[2] = $row['count'];
+    }
 }
+
+// Lấy dữ liệu thống kê bệnh nhân theo độ tuổi
+$current_year = date('Y');
+$sql_age = "SELECT 
+             SUM(CASE WHEN ($current_year - nam_sinh) < 18 THEN 1 ELSE 0 END) as under_18,
+             SUM(CASE WHEN ($current_year - nam_sinh) BETWEEN 18 AND 30 THEN 1 ELSE 0 END) as from_18_to_30,
+             SUM(CASE WHEN ($current_year - nam_sinh) BETWEEN 31 AND 45 THEN 1 ELSE 0 END) as from_31_to_45,
+             SUM(CASE WHEN ($current_year - nam_sinh) BETWEEN 46 AND 60 THEN 1 ELSE 0 END) as from_46_to_60,
+             SUM(CASE WHEN ($current_year - nam_sinh) > 60 THEN 1 ELSE 0 END) as over_60
+             FROM benhnhan";
+$result_age = $conn->query($sql_age);
+$age_data = $result_age->fetch_assoc();
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tổng quan - Quản trị hệ thống</title>
+    <title>Tổng quan - Phòng khám Lộc Bình</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -94,9 +89,11 @@ while ($row = $result_recent->fetch_assoc()) {
             color: white;
             overflow: hidden;
         }
+
         .stats-card:hover {
             transform: translateY(-5px);
         }
+
         .stats-icon {
             font-size: 30px;
             position: absolute;
@@ -104,15 +101,18 @@ while ($row = $result_recent->fetch_assoc()) {
             right: 20px;
             opacity: 0.8;
         }
+
         .stats-number {
             font-size: 28px;
             font-weight: 700;
             margin-bottom: 5px;
         }
+
         .stats-title {
             font-size: 14px;
             opacity: 0.9;
         }
+
         .graph-card {
             border-radius: 10px;
             padding: 20px;
@@ -120,64 +120,48 @@ while ($row = $result_recent->fetch_assoc()) {
             background-color: white;
             box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
         }
-        .appointments-card {
-            border-radius: 10px;
-            background-color: white;
-            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
-        }
-        .appointments-title {
-            padding: 15px 20px;
-            border-bottom: 1px solid #eee;
-            font-weight: 600;
-        }
-        .appointment-item {
-            padding: 15px 20px;
-            border-bottom: 1px solid #f5f5f5;
-        }
-        .appointment-item:last-child {
-            border-bottom: none;
-        }
-        .appointment-item:hover {
-            background-color: #f8f9fa;
-        }
-        .status-badge {
-            padding: 5px 10px;
-            border-radius: 20px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .bg-primary-gradient {
-            background: linear-gradient(45deg, #0d6efd, #198ae3);
-        }
-        .bg-success-gradient {
-            background: linear-gradient(45deg, #198754, #20c997);
-        }
-        .bg-warning-gradient {
-            background: linear-gradient(45deg, #ffc107, #fd7e14);
-        }
-        .bg-danger-gradient {
-            background: linear-gradient(45deg, #dc3545, #ff4d5e);
-        }
+
         .chart-container {
             height: 300px;
         }
+
         .chart-title {
             font-weight: 600;
             margin-bottom: 15px;
         }
+
+        .bg-primary-gradient {
+            background: linear-gradient(45deg, #0d6efd, #198ae3);
+        }
+
+        .bg-success-gradient {
+            background: linear-gradient(45deg, #198754, #20c997);
+        }
+
+        .bg-warning-gradient {
+            background: linear-gradient(45deg, #ffc107, #fd7e14);
+        }
+
+        .bg-info-gradient {
+            background: linear-gradient(45deg, #0dcaf0, #0b96cc);
+        }
+
         @media (max-width: 768px) {
             .stats-number {
                 font-size: 24px;
             }
+
             .stats-icon {
                 font-size: 24px;
             }
+
             .chart-container {
                 height: 250px;
             }
         }
     </style>
 </head>
+
 <body>
     <div class="container-fluid">
         <div class="row">
@@ -185,144 +169,92 @@ while ($row = $result_recent->fetch_assoc()) {
             <?php include 'includes/sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-12 main-content ms-sm-auto p-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Tổng quan</h1>
-                    <div class="btn-toolbar mb-2 mb-md-0">
-                        <div class="btn-group me-2">
-                            <button type="button" class="btn btn-sm btn-outline-secondary">
-                                <i class="fas fa-calendar-alt"></i> <?php echo date('d/m/Y'); ?>
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div class="col-md-12 main-content mt-5">
+                <div class="content-wrapper">
 
-                <!-- Stats Cards -->
-                <div class="row">
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stats-card bg-primary-gradient">
-                            <div class="stats-icon">
-                                <i class="fas fa-calendar-check"></i>
+                    <div class="content-header d-flex justify-content-between align-items-center">
+                        <h2 class="page-title">Tổng quan</h2>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <div class="btn-group me-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary">
+                                    <i class="fas fa-calendar-alt"></i> <?php echo date('d/m/Y'); ?>
+                                </button>
                             </div>
-                            <div class="stats-number"><?php echo $appointments_today; ?></div>
-                            <div class="stats-title">Lịch hẹn hôm nay</div>
                         </div>
                     </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stats-card bg-success-gradient">
-                            <div class="stats-icon">
-                                <i class="fas fa-user-md"></i>
-                            </div>
-                            <div class="stats-number"><?php echo $total_doctors; ?></div>
-                            <div class="stats-title">Bác sĩ</div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stats-card bg-warning-gradient">
-                            <div class="stats-icon">
-                                <i class="fas fa-users"></i>
-                            </div>
-                            <div class="stats-number"><?php echo $total_patients; ?></div>
-                            <div class="stats-title">Bệnh nhân</div>
-                        </div>
-                    </div>
-                    <div class="col-xl-3 col-md-6">
-                        <div class="stats-card bg-danger-gradient">
-                            <div class="stats-icon">
-                                <i class="fas fa-hourglass-half"></i>
-                            </div>
-                            <div class="stats-number"><?php echo $pending_appointments; ?></div>
-                            <div class="stats-title">Lịch hẹn chờ xác nhận</div>
-                        </div>
-                    </div>
-                </div>
 
-                <!-- Charts Row -->
-                <div class="row">
-                    <!-- Monthly Appointments Chart -->
-                    <div class="col-lg-8">
-                        <div class="graph-card">
-                            <h5 class="chart-title">Lịch hẹn theo tháng trong năm <?php echo date('Y'); ?></h5>
-                            <div class="chart-container">
-                                <canvas id="monthlyAppointmentsChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Specialty Distribution Chart -->
-                    <div class="col-lg-4">
-                        <div class="graph-card">
-                            <h5 class="chart-title">Phân bố theo chuyên khoa</h5>
-                            <div class="chart-container">
-                                <canvas id="specialtyDistributionChart"></canvas>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Recent Appointments -->
-                <div class="row mt-4">
-                    <div class="col-12">
-                        <div class="appointments-card">
-                            <div class="appointments-title d-flex justify-content-between align-items-center">
-                                <span>Lịch hẹn gần đây</span>
-                                <a href="lichhen.php" class="btn btn-sm btn-outline-primary">Xem tất cả</a>
-                            </div>
-                            <?php if (count($recent_appointments) > 0): ?>
-                                <?php foreach ($recent_appointments as $appointment): ?>
-                                    <div class="appointment-item">
-                                        <div class="row align-items-center">
-                                            <div class="col-md-3 col-sm-6">
-                                                <div><strong class="text-primary"><?php echo $appointment['ma_lichhen']; ?></strong></div>
-                                                <div class="small text-muted">
-                                                    <?php echo date('d/m/Y', strtotime($appointment['ngay_hen'])); ?> - 
-                                                    <?php echo $appointment['gio_hen']; ?>
-                                                </div>
-                                            </div>
-                                            <div class="col-md-3 col-sm-6">
-                                                <div><i class="fas fa-user me-1"></i> <?php echo $appointment['ten_benhnhan']; ?></div>
-                                            </div>
-                                            <div class="col-md-3 col-sm-6">
-                                                <div><i class="fas fa-user-md me-1"></i> <?php echo $appointment['ten_bacsi']; ?></div>
-                                            </div>
-                                            <div class="col-md-3 col-sm-6 text-md-end">
-                                                <?php
-                                                    $status_class = "";
-                                                    $status_text = "";
-                                                    switch($appointment['trang_thai']) {
-                                                        case 'pending':
-                                                            $status_class = "bg-warning text-dark";
-                                                            $status_text = "Chờ xác nhận";
-                                                            break;
-                                                        case 'confirmed':
-                                                            $status_class = "bg-primary";
-                                                            $status_text = "Đã xác nhận";
-                                                            break;
-                                                        case 'completed':
-                                                            $status_class = "bg-success";
-                                                            $status_text = "Đã hoàn thành";
-                                                            break;
-                                                        case 'cancelled':
-                                                            $status_class = "bg-danger";
-                                                            $status_text = "Đã hủy";
-                                                            break;
-                                                        default:
-                                                            $status_class = "bg-secondary";
-                                                            $status_text = "Không xác định";
-                                                    }
-                                                ?>
-                                                <span class="status-badge <?php echo $status_class; ?>">
-                                                    <?php echo $status_text; ?>
-                                                </span>
-                                            </div>
-                                        </div>
-                                    </div>
-                                <?php endforeach; ?>
-                            <?php else: ?>
-                                <div class="appointment-item text-center py-4">
-                                    <p class="text-muted">Không có lịch hẹn gần đây</p>
+                    <!-- Stats Cards -->
+                    <div class="row">
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stats-card bg-primary-gradient">
+                                <div class="stats-icon">
+                                    <i class="fas fa-user-md"></i>
                                 </div>
-                            <?php endif; ?>
+                                <div class="stats-number"><?php echo $total_doctors; ?></div>
+                                <div class="stats-title">Bác sĩ</div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stats-card bg-success-gradient">
+                                <div class="stats-icon">
+                                    <i class="fas fa-users"></i>
+                                </div>
+                                <div class="stats-number"><?php echo $total_patients; ?></div>
+                                <div class="stats-title">Bệnh nhân</div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stats-card bg-warning-gradient">
+                                <div class="stats-icon">
+                                    <i class="fas fa-stethoscope"></i>
+                                </div>
+                                <div class="stats-number"><?php echo $total_specialties; ?></div>
+                                <div class="stats-title">Chuyên khoa</div>
+                            </div>
+                        </div>
+                        <div class="col-xl-3 col-md-6">
+                            <div class="stats-card bg-info-gradient">
+                                <div class="stats-icon">
+                                    <i class="fas fa-clipboard-list"></i>
+                                </div>
+                                <div class="stats-number"><?php echo $total_services; ?></div>
+                                <div class="stats-title">Dịch vụ</div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Charts Row -->
+                    <div class="row">
+                        <!-- Doctors by Specialty Chart -->
+                        <div class="col-lg-6">
+                            <div class="graph-card">
+                                <h5 class="chart-title">Bác sĩ theo chuyên khoa</h5>
+                                <div class="chart-container">
+                                    <canvas id="doctorsBySpecialtyChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Patients by Gender Chart -->
+                        <div class="col-lg-6">
+                            <div class="graph-card">
+                                <h5 class="chart-title">Phân bố bệnh nhân theo giới tính</h5>
+                                <div class="chart-container">
+                                    <canvas id="patientsByGenderChart"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Age Distribution Chart -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div class="graph-card">
+                                <h5 class="chart-title">Phân bố bệnh nhân theo độ tuổi</h5>
+                                <div class="chart-container">
+                                    <canvas id="patientsByAgeChart"></canvas>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -337,49 +269,30 @@ while ($row = $result_recent->fetch_assoc()) {
     <!-- Admin JS -->
     <script src="asset/admin.js"></script>
     <script>
-        // Dữ liệu biểu đồ lịch hẹn theo tháng
-        const monthlyData = <?php echo json_encode(array_values($monthly_data)); ?>;
-        const monthLabels = ['Tháng 1', 'Tháng 2', 'Tháng 3', 'Tháng 4', 'Tháng 5', 'Tháng 6', 
-                            'Tháng 7', 'Tháng 8', 'Tháng 9', 'Tháng 10', 'Tháng 11', 'Tháng 12'];
-        
-        // Dữ liệu biểu đồ phân bố theo chuyên khoa
+        // Dữ liệu biểu đồ bác sĩ theo chuyên khoa
         const specialtyLabels = <?php echo json_encode($specialty_labels); ?>;
         const specialtyData = <?php echo json_encode($specialty_data); ?>;
-        
+
+        // Dữ liệu biểu đồ bệnh nhân theo giới tính
+        const genderData = <?php echo json_encode($gender_data); ?>;
+        const genderLabels = ['Nam', 'Nữ', 'Khác'];
+
+        // Dữ liệu biểu đồ phân bố độ tuổi
+        const ageData = [
+            <?php echo $age_data['under_18'] ?? 0; ?>,
+            <?php echo $age_data['from_18_to_30'] ?? 0; ?>,
+            <?php echo $age_data['from_31_to_45'] ?? 0; ?>,
+            <?php echo $age_data['from_46_to_60'] ?? 0; ?>,
+            <?php echo $age_data['over_60'] ?? 0; ?>
+        ];
+        const ageLabels = ['<18', '18-30', '31-45', '46-60', '>60'];
+
         // Khởi tạo biểu đồ khi trang đã tải xong
-        document.addEventListener('DOMContentLoaded', function() {
-            // Biểu đồ lịch hẹn theo tháng
-            const monthlyCtx = document.getElementById('monthlyAppointmentsChart').getContext('2d');
-            const monthlyAppointmentsChart = new Chart(monthlyCtx, {
-                type: 'bar',
-                data: {
-                    labels: monthLabels,
-                    datasets: [{
-                        label: 'Số lượng lịch hẹn',
-                        data: monthlyData,
-                        backgroundColor: 'rgba(54, 162, 235, 0.5)',
-                        borderColor: 'rgb(54, 162, 235)',
-                        borderWidth: 1
-                    }]
-                },
-                options: {
-                    responsive: true,
-                    maintainAspectRatio: false,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                precision: 0
-                            }
-                        }
-                    }
-                }
-            });
-            
-            // Biểu đồ phân bố theo chuyên khoa
-            const specialtyCtx = document.getElementById('specialtyDistributionChart').getContext('2d');
-            const specialtyDistributionChart = new Chart(specialtyCtx, {
-                type: 'doughnut',
+        document.addEventListener('DOMContentLoaded', function () {
+            // Biểu đồ bác sĩ theo chuyên khoa
+            const specialtyCtx = document.getElementById('doctorsBySpecialtyChart').getContext('2d');
+            const doctorsBySpecialtyChart = new Chart(specialtyCtx, {
+                type: 'pie',
                 data: {
                     labels: specialtyLabels,
                     datasets: [{
@@ -420,6 +333,75 @@ while ($row = $result_recent->fetch_assoc()) {
                             labels: {
                                 boxWidth: 15
                             }
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Biểu đồ bệnh nhân theo giới tính
+            const genderCtx = document.getElementById('patientsByGenderChart').getContext('2d');
+            const patientsByGenderChart = new Chart(genderCtx, {
+                type: 'doughnut',
+                data: {
+                    labels: genderLabels,
+                    datasets: [{
+                        data: genderData,
+                        backgroundColor: [
+                            'rgba(54, 162, 235, 0.7)',
+                            'rgba(255, 99, 132, 0.7)',
+                            'rgba(153, 102, 255, 0.7)'
+                        ],
+                        borderColor: [
+                            'rgb(54, 162, 235)',
+                            'rgb(255, 99, 132)',
+                            'rgb(153, 102, 255)'
+                        ],
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    plugins: {
+                        legend: {
+                            position: 'right',
+                            labels: {
+                                boxWidth: 15
+                            }
+                        },
+                        title: {
+                            display: false
+                        }
+                    }
+                }
+            });
+
+            // Biểu đồ phân bố độ tuổi
+            const ageCtx = document.getElementById('patientsByAgeChart').getContext('2d');
+            const patientsByAgeChart = new Chart(ageCtx, {
+                type: 'bar',
+                data: {
+                    labels: ageLabels,
+                    datasets: [{
+                        label: 'Số bệnh nhân',
+                        data: ageData,
+                        backgroundColor: 'rgba(75, 192, 192, 0.7)',
+                        borderColor: 'rgb(75, 192, 192)',
+                        borderWidth: 1
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                precision: 0
+                            }
                         }
                     }
                 }
@@ -427,4 +409,5 @@ while ($row = $result_recent->fetch_assoc()) {
         });
     </script>
 </body>
+
 </html>

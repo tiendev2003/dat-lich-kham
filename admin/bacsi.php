@@ -1,11 +1,15 @@
 <?php
+// Kiểm tra quyền truy cập
+require_once 'includes/auth_check.php';
+
 // Kết nối đến cơ sở dữ liệu
 require_once 'includes/db_connect.php';
 
 // Thiết lập phân trang
-$current_page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$current_page = isset($_GET['page']) ? (int) $_GET['page'] : 1;
 $items_per_page = 10; // Số bác sĩ hiển thị trên mỗi trang
-if ($current_page < 1) $current_page = 1;
+if ($current_page < 1)
+    $current_page = 1;
 
 // Lấy danh sách bác sĩ
 $filter = [];
@@ -48,10 +52,8 @@ $specialties = getAllSpecialties();
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <!-- Summernote CSS -->
     <link href="https://cdn.jsdelivr.net/npm/summernote@0.8.18/dist/summernote-bs4.min.css" rel="stylesheet">
-    <!-- Admin CSS -->
-    <link rel="stylesheet" href="asset/admin.css">
     <!-- Custom CSS -->
-    <link rel="stylesheet" href="asset/bacsi.css">
+    <link rel="stylesheet" href="asset/admin.css">
     <style>
         .doctor-info-modal .modal-body {
             max-height: 70vh;
@@ -86,9 +88,9 @@ $specialties = getAllSpecialties();
             <?php include 'includes/sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-12 main-content mt-5">
+            <div class="col-md-12 main-content  mt-5 ">
                 <div class="content-wrapper">
-                    <div class="content-header d-flex justify-content-between align-items-center mb-4">
+                    <div class="content-header d-flex justify-content-between align-items-center  ">
                         <h2 class="page-title">Quản lý Bác sĩ</h2>
                         <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addDoctorModal">
                             <i class="fas fa-user-plus"></i> Thêm bác sĩ mới
@@ -209,7 +211,7 @@ $specialties = getAllSpecialties();
                                         </tbody>
                                     </table>
                                 </div>
-                                
+
                                 <!-- Pagination -->
                                 <nav aria-label="Phân trang" class="mt-4">
                                     <ul class="pagination justify-content-center">
@@ -251,15 +253,16 @@ $specialties = getAllSpecialties();
                                         <?php endif; ?>
                                     </ul>
                                 </nav>
-                                
+
                                 <div class="text-center mt-2">
                                     <small class="text-muted">
-                                        Hiển thị <?php echo count($doctors); ?> trong tổng số <?php echo $total_doctors; ?> bác sĩ 
+                                        Hiển thị <?php echo count($doctors); ?> trong tổng số <?php echo $total_doctors; ?>
+                                        bác sĩ
                                         (Trang <?php echo $current_page; ?> / <?php echo $total_pages; ?>)
                                     </small>
                                 </div>
-                                
-                                
+
+
                             <?php else: ?>
                                 <div class="alert alert-info">Không tìm thấy bác sĩ nào. Hãy thêm bác sĩ mới!</div>
                             <?php endif; ?>
@@ -268,6 +271,7 @@ $specialties = getAllSpecialties();
                 </div>
             </div>
         </div>
+    </div>
     </div>
 
     <!-- Add Doctor Modal -->
@@ -611,18 +615,62 @@ $specialties = getAllSpecialties();
                 ]
             });
 
+            // Add doctor functionality (new code)
+            $('#submitAddDoctor').on('click', function () {
+                var formData = new FormData($('#addDoctorForm')[0]);
+
+                $.ajax({
+                    type: 'POST',
+                    url: 'crud/bacsi_crud.php',
+                    data: formData,
+                    processData: false,
+                    contentType: false,
+                    success: function (response) {
+                        try {
+                            var result = typeof response === 'string' ? JSON.parse(response) : response;
+
+                            if (result.success) {
+                                alert(result.message);
+
+                                // If a password was returned (account created), show it in the password modal
+                                if (result.password) {
+                                    $('#accountEmail').text($('#email').val());
+                                    $('#accountPassword').text(result.password);
+                                    $('#passwordModal').modal('show');
+                                } else {
+                                    $('#addDoctorModal').modal('hide');
+                                    // Refresh page to see changes
+                                    setTimeout(function () {
+                                        window.location.reload();
+                                    }, 1000);
+                                }
+                            } else {
+                                alert(result.message || 'Có lỗi xảy ra khi thêm bác sĩ.');
+                            }
+                        } catch (e) {
+                            console.error('Lỗi khi xử lý phản hồi:', e, response);
+                            alert('Có lỗi xảy ra trong quá trình xử lý phản hồi.');
+                        }
+                    },
+                    error: function (xhr, status, error) {
+                        console.error('AJAX Error:', xhr.responseText);
+                        alert('Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.');
+                    }
+                });
+            });
+
             // Debug các buttons để xem sự kiện có được kích hoạt không
             console.log("Số lượng nút view-doctor:", $('.view-doctor').length);
             console.log("Số lượng nút edit-doctor:", $('.edit-doctor').length);
 
             // Xử lý khi click vào nút Edit để sửa thông tin bác sĩ
-            $(document).on('click', '.edit-doctor', function() {
+            $(document).on('click', '.edit-doctor', function () {
                 var doctorId = $(this).data('id');
                 console.log("Đã click vào nút sửa bác sĩ ID:", doctorId);
-                
+
                 // Hiện modal trước để người dùng biết đang tải
                 $('#editDoctorModal').modal('show');
-                
+
                 // Load thông tin bác sĩ từ server
                 $.ajax({
                     type: 'GET',
@@ -632,17 +680,17 @@ $specialties = getAllSpecialties();
                         id: doctorId
                     },
                     dataType: 'json',
-                    success: function(doctor) {
+                    success: function (doctor) {
                         if (!doctor) {
                             alert('Không thể tải thông tin bác sĩ. Vui lòng thử lại sau.');
                             return;
                         }
-                        
+
                         if (doctor.error) {
                             alert(doctor.error);
                             return;
                         }
-                        
+
                         // Điền thông tin vào form
                         $('#editDoctorId').val(doctor.id);
                         $('#edit_hoTen').val(doctor.ho_ten);
@@ -652,51 +700,51 @@ $specialties = getAllSpecialties();
                         $('#edit_dienThoai').val(doctor.dien_thoai);
                         $('#edit_email').val(doctor.email);
                         $('#edit_diaChi').val(doctor.dia_chi);
-                        
+
                         // Xử lý và hiển thị hình ảnh hiện tại
                         if (doctor.hinh_anh) {
                             $('#currentImageContainer').html('<img src="../' + doctor.hinh_anh + '" alt="Hình ảnh hiện tại" class="img-thumbnail" style="max-height: 150px;">');
                         } else {
                             $('#currentImageContainer').html('<div class="text-muted">Chưa có hình ảnh</div>');
                         }
-                        
+
                         // Cập nhật nội dung các trình soạn thảo Summernote
                         $('#edit_moTa').summernote('code', doctor.mo_ta || '');
                         $('#edit_bangCap').summernote('code', doctor.bang_cap || '');
                         $('#edit_kinhNghiem').summernote('code', doctor.kinh_nghiem || '');
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error("AJAX Error:", error);
                         alert('Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.');
                     }
                 });
             });
-            
+
             // Xử lý nút "Edit" từ modal xem chi tiết
-            $(document).on('click', '.edit-from-view', function() {
+            $(document).on('click', '.edit-from-view', function () {
                 var doctorId = $(this).data('id');
                 $('#viewDoctorModal').modal('hide'); // Ẩn modal xem chi tiết
-                
+
                 // Tạm thời đợi modal ẩn hoàn toàn rồi mới mở modal sửa
-                setTimeout(function() {
+                setTimeout(function () {
                     $('.edit-doctor[data-id="' + doctorId + '"]').click();
                 }, 500);
             });
-            
+
             // Xử lý khi click nút "Cập nhật"
-            $('#submitEditDoctor').on('click', function() {
+            $('#submitEditDoctor').on('click', function () {
                 var formData = new FormData($('#editDoctorForm')[0]);
-                
+
                 $.ajax({
                     type: 'POST',
                     url: 'crud/bacsi_crud.php',
                     data: formData,
                     processData: false,
                     contentType: false,
-                    success: function(response) {
+                    success: function (response) {
                         try {
                             var result = typeof response === 'string' ? JSON.parse(response) : response;
-                            
+
                             if (result.success) {
                                 alert(result.message);
                                 $('#editDoctorModal').modal('hide');
@@ -710,7 +758,7 @@ $specialties = getAllSpecialties();
                             alert('Có lỗi xảy ra trong quá trình xử lý phản hồi.');
                         }
                     },
-                    error: function(xhr, status, error) {
+                    error: function (xhr, status, error) {
                         console.error('AJAX Error:', xhr.responseText);
                         alert('Có lỗi xảy ra khi kết nối tới máy chủ. Vui lòng thử lại sau.');
                     }
@@ -724,7 +772,7 @@ $specialties = getAllSpecialties();
 
                 // Hiện modal trước để người dùng biết đang tải
                 $('#viewDoctorModal').modal('show');
-                
+
                 // Load doctor data using AJAX
                 $.ajax({
                     type: 'GET',

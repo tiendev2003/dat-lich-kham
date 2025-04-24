@@ -1,17 +1,18 @@
+<?php
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Giới thiệu';
+require_once 'includes/functions.php';
+
+// Lấy thông tin từ cài đặt
+$site_name = get_setting('site_name', 'Phòng khám Lộc Bình');
+$about_image = get_setting('about_image', 'assets/img/anh-gioithieu.jpg');
+$about_content = get_setting('about_content', '');
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/about.css">
-
-
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
     <!-- Header -->
@@ -19,25 +20,29 @@
 
     <!-- Main Content -->
     <div class="container my-5">
-        <h1 class="text-center mb-4">Giới thiệu về Phòng khám Lộc Bình</h1>
+        <h1 class="text-center mb-4">Giới thiệu về <?php echo htmlspecialchars($site_name); ?></h1>
         <div class="row">
             <div class="col-md-6">
-                <img src="assets/img/anh-gioithieu.jpg" alt="Phòng khám Lộc Bình" class="img-fluid rounded">
+                <img src="<?php echo $about_image; ?>" alt="<?php echo htmlspecialchars($site_name); ?>" class="img-fluid rounded">
             </div>
             <div class="col-md-6">
-                <h2>Chúng tôi là ai?</h2>
-                <p>
-                    Phòng khám Lộc Bình được thành lập với sứ mệnh cung cấp dịch vụ chăm sóc sức khỏe chất lượng cao cho cộng đồng. 
-                    Chúng tôi tự hào là một trong những phòng khám hàng đầu trong khu vực, với đội ngũ bác sĩ chuyên môn cao và 
-                    trang thiết bị hiện đại.
-                </p>
-                <h2>Giá trị cốt lõi</h2>
-                <ul>
-                    <li>Chất lượng dịch vụ</li>
-                    <li>Đội ngũ bác sĩ chuyên nghiệp</li>
-                    <li>Chăm sóc tận tâm</li>
-                    <li>Đổi mới và sáng tạo</li>
-                </ul>
+                <?php if (!empty($about_content)): ?>
+                    <?php echo $about_content; ?>
+                <?php else: ?>
+                    <h2>Chúng tôi là ai?</h2>
+                    <p>
+                        <?php echo htmlspecialchars($site_name); ?> được thành lập với sứ mệnh cung cấp dịch vụ chăm sóc sức khỏe chất lượng cao cho cộng đồng. 
+                        Chúng tôi tự hào là một trong những phòng khám hàng đầu trong khu vực, với đội ngũ bác sĩ chuyên môn cao và 
+                        trang thiết bị hiện đại.
+                    </p>
+                    <h2>Giá trị cốt lõi</h2>
+                    <ul>
+                        <li>Chất lượng dịch vụ</li>
+                        <li>Đội ngũ bác sĩ chuyên nghiệp</li>
+                        <li>Chăm sóc tận tâm</li>
+                        <li>Đổi mới và sáng tạo</li>
+                    </ul>
+                <?php endif; ?>
             </div>
         </div>
 
@@ -57,4 +62,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
-</html> 
+</html>

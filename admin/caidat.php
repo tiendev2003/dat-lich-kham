@@ -1,64 +1,158 @@
 <?php
+// Kiểm tra quyền truy cập
+require_once 'includes/auth_check.php';
+
 // Kết nối đến cơ sở dữ liệu
 require_once 'includes/db_connect.php';
 
 // Xử lý khi form được submit
-if ($_SERVER['REQUEST_METHOD'] === 'POST' && isset($_POST['action']) && $_POST['action'] === 'save_settings') {
-    foreach ($_POST as $key => $value) {
-        if ($key !== 'action') {
-            // Cập nhật giá trị trong cơ sở dữ liệu
-            $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = ?");
-            $stmt->bind_param("ss", $value, $key);
-            $stmt->execute();
+if ($_SERVER['REQUEST_METHOD'] === 'POST') {
+    if (isset($_POST['action']) && $_POST['action'] === 'save_settings') {
+        foreach ($_POST as $key => $value) {
+            if ($key !== 'action') {
+                // Cập nhật giá trị trong cơ sở dữ liệu
+                $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = ?");
+                $stmt->bind_param("ss", $value, $key);
+                $stmt->execute();
+            }
         }
-    }
 
-    // Xử lý tải lên logo
-    if (isset($_FILES['site_logo']) && $_FILES['site_logo']['error'] === UPLOAD_ERR_OK) {
-        $target_dir = "../assets/img/";
-        
-        // Kiểm tra và tạo thư mục nếu không tồn tại
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0755, true);
+        // Xử lý tải lên logo
+        if (isset($_FILES['site_logo']) && $_FILES['site_logo']['error'] === UPLOAD_ERR_OK) {
+            $target_dir = "../assets/img/";
+            
+            // Kiểm tra và tạo thư mục nếu không tồn tại
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0755, true);
+            }
+            
+            $file_extension = pathinfo($_FILES['site_logo']['name'], PATHINFO_EXTENSION);
+            $new_filename = "logo." . $file_extension;
+            $target_file = $target_dir . $new_filename;
+            
+            // Tải lên tệp
+            if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $target_file)) {
+                $logo_path = "assets/img/" . $new_filename;
+                $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = 'site_logo'");
+                $stmt->bind_param("s", $logo_path);
+                $stmt->execute();
+            }
         }
         
-        $file_extension = pathinfo($_FILES['site_logo']['name'], PATHINFO_EXTENSION);
-        $new_filename = "logo." . $file_extension;
-        $target_file = $target_dir . $new_filename;
+        // Xử lý tải lên favicon
+        if (isset($_FILES['site_favicon']) && $_FILES['site_favicon']['error'] === UPLOAD_ERR_OK) {
+            $target_dir = "../assets/img/";
+            
+            // Kiểm tra và tạo thư mục nếu không tồn tại
+            if (!file_exists($target_dir)) {
+                mkdir($target_dir, 0755, true);
+            }
+            
+            $file_extension = pathinfo($_FILES['site_favicon']['name'], PATHINFO_EXTENSION);
+            $new_filename = "favicon." . $file_extension;
+            $target_file = $target_dir . $new_filename;
+            
+            // Tải lên tệp
+            if (move_uploaded_file($_FILES['site_favicon']['tmp_name'], $target_file)) {
+                $favicon_path = "assets/img/" . $new_filename;
+                $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = 'site_favicon'");
+                $stmt->bind_param("s", $favicon_path);
+                $stmt->execute();
+            }
+        }
         
-        // Tải lên tệp
-        if (move_uploaded_file($_FILES['site_logo']['tmp_name'], $target_file)) {
-            $logo_path = "assets/img/" . $new_filename;
-            $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = 'site_logo'");
-            $stmt->bind_param("s", $logo_path);
-            $stmt->execute();
+        // Làm mới cache cài đặt
+        clearSettingsCache();
+        
+        // Thông báo thành công
+        $success_message = "Lưu cài đặt thành công!";
+    } elseif (isset($_POST['action']) && $_POST['action'] === 'sync_settings') {
+        // Đồng bộ cài đặt
+        if (syncSettings()) {
+            $success_message = "Đồng bộ cài đặt thành công!";
+        } else {
+            $error_message = "Có lỗi xảy ra khi đồng bộ cài đặt.";
         }
     }
+}
+
+/**
+ * Xóa cache cài đặt để đảm bảo lấy dữ liệu mới
+ */
+function clearSettingsCache() {
+    // Ghi vào file cache thời gian cập nhật mới nhất
+    $cache_file = "../includes/settings_cache.php";
+    $cache_content = "<?php\n";
+    $cache_content .= "// Thời gian cập nhật cài đặt mới nhất\n";
+    $cache_content .= "\$settings_last_updated = ".time().";\n";
+    $cache_content .= "?>";
     
-    // Xử lý tải lên favicon
-    if (isset($_FILES['site_favicon']) && $_FILES['site_favicon']['error'] === UPLOAD_ERR_OK) {
-        $target_dir = "../assets/img/";
+    file_put_contents($cache_file, $cache_content);
+}
+
+/**
+ * Đồng bộ cài đặt trên toàn hệ thống
+ */
+function syncSettings() {
+    global $conn;
+    try {
+        // 1. Tạo file cache lưu các cài đặt phổ biến
+        $settings_query = "SELECT ten_key, ten_value FROM caidat_website";
+        $settings_result = $conn->query($settings_query);
         
-        // Kiểm tra và tạo thư mục nếu không tồn tại
-        if (!file_exists($target_dir)) {
-            mkdir($target_dir, 0755, true);
+        if (!$settings_result) {
+            return false;
         }
         
-        $file_extension = pathinfo($_FILES['site_favicon']['name'], PATHINFO_EXTENSION);
-        $new_filename = "favicon." . $file_extension;
-        $target_file = $target_dir . $new_filename;
-        
-        // Tải lên tệp
-        if (move_uploaded_file($_FILES['site_favicon']['tmp_name'], $target_file)) {
-            $favicon_path = "assets/img/" . $new_filename;
-            $stmt = $conn->prepare("UPDATE caidat_website SET ten_value = ? WHERE ten_key = 'site_favicon'");
-            $stmt->bind_param("s", $favicon_path);
-            $stmt->execute();
+        $settings = [];
+        while ($row = $settings_result->fetch_assoc()) {
+            $settings[$row['ten_key']] = $row['ten_value'];
         }
+        
+        // 2. Tạo file cài đặt để sử dụng
+        $settings_file = "../includes/settings_data.php";
+        
+        $file_content = "<?php\n";
+        $file_content .= "// File được sinh tự động từ phần cài đặt hệ thống\n";
+        $file_content .= "// Cập nhật lần cuối: " . date("Y-m-d H:i:s") . "\n\n";
+        $file_content .= "\$settings_data = [\n";
+        
+        foreach ($settings as $key => $value) {
+            // Xử lý các giá trị đặc biệt
+            if (is_numeric($value)) {
+                $file_content .= "    '{$key}' => {$value},\n";
+            } else {
+                $file_content .= "    '{$key}' => '".addslashes($value)."',\n";
+            }
+        }
+        
+        $file_content .= "];\n?>";
+        
+        file_put_contents($settings_file, $file_content);
+        
+        // 3. Cập nhật phiên bản cài đặt
+        $version_file = "../includes/settings_version.php";
+        $version_content = "<?php\n";
+        $version_content .= "/**\n";
+        $version_content .= " * File quản lý phiên bản cài đặt để đảm bảo đồng bộ trên toàn hệ thống\n";
+        $version_content .= " * File này được tự động cập nhật khi cài đặt thay đổi\n";
+        $version_content .= " */\n\n";
+        $version_content .= "// Phiên bản cài đặt hiện tại\n";
+        $version_content .= "\$settings_version = " . time() . ";\n\n";
+        $version_content .= "// Thời gian cập nhật cuối cùng\n";
+        $version_content .= "\$settings_last_updated = '" . date('Y-m-d H:i:s') . "';\n";
+        $version_content .= "?>";
+        
+        file_put_contents($version_file, $version_content);
+        
+        // 4. Xóa file cache để đảm bảo lấy dữ liệu mới
+        clearSettingsCache();
+        
+        return true;
+    } catch (Exception $e) {
+        error_log("Lỗi đồng bộ cài đặt: " . $e->getMessage());
+        return false;
     }
-    
-    // Thông báo thành công
-    $success_message = "Lưu cài đặt thành công!";
 }
 
 // Lấy tất cả các cài đặt từ cơ sở dữ liệu
@@ -89,7 +183,7 @@ $groups = [
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Cài đặt Website - Quản trị hệ thống</title>
+    <title>Cài đặt Website - Phòng khám Lộc Bình</title>
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
@@ -164,14 +258,21 @@ $groups = [
             <?php include 'includes/sidebar.php'; ?>
 
             <!-- Main Content -->
-            <div class="col-md-12 main-content ms-sm-auto p-4">
-                <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                    <h1 class="h2">Cài đặt Website</h1>
+            <div class="col-md-12 main-content  mt-5 ">
+            <div class="content-wrapper">
+
+                <div class="content-header d-flex justify-content-between align-items-center ">
+                    <h2 class="page-title">Cài đặt Website</h2>
                 </div>
 
                 <?php if (isset($success_message)): ?>
                     <div class="alert alert-success alert-dismissible fade show" role="alert">
                         <?php echo $success_message; ?>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                <?php elseif (isset($error_message)): ?>
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert">
+                        <?php echo $error_message; ?>
                         <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                     </div>
                 <?php endif; ?>
@@ -314,7 +415,17 @@ $groups = [
                             </button>
                         </div>
                     </form>
+
+                    <form action="" method="POST" class="mt-4">
+                        <input type="hidden" name="action" value="sync_settings">
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                            <button type="submit" class="btn btn-secondary">
+                                <i class="fas fa-sync me-2"></i> Đồng bộ cài đặt
+                            </button>
+                        </div>
+                    </form>
                 </div>
+            </div>
             </div>
         </div>
     </div>

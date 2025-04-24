@@ -1,10 +1,12 @@
 <?php
+// Thiết lập tiêu đề trang cho head.php
 // Start the session before any output
 session_start();
 
-// Kết nối database
+// Kết nối database và load functions
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
+require_once 'includes/functions.php';
 
 // Lấy ID dịch vụ từ tham số URL
 $service_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -28,6 +30,13 @@ if (!$service_result || $service_result->num_rows == 0) {
 }
 
 $service = $service_result->fetch_assoc();
+
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = $service['ten_dichvu'];
+
+// Lấy thông số từ cài đặt
+$site_name = get_setting('site_name', 'Phòng Khám Lộc Bình');
+$site_working_hours = get_setting('site_working_hours', 'Thứ 2 - Thứ 6: 8:00 - 17:00');
 
 // Lấy các gói dịch vụ liên quan (giả sử có bảng goi_dichvu liên kết với dichvu)
 $packages = [];
@@ -97,22 +106,28 @@ if (!empty($service['chuyenkhoa_id'])) {
 function formatPrice($price) {
     return number_format($price, 0, ',', '.') . 'đ';
 }
+
+// Phân tích chuỗi giờ làm việc thành mảng
+$working_hours = explode(',', $site_working_hours);
+$working_days = '';
+
+if(!empty($working_hours)) {
+    foreach($working_hours as $hour) {
+        if(strpos($hour, 'Thứ 2') !== false || strpos($hour, 'T2') !== false) {
+            $working_days = 'Thứ 2 - Thứ 6';
+            break;
+        }
+    }
+    if(empty($working_days)) {
+        $working_days = 'Thứ 2 - Thứ 7';
+    }
+}
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title><?= $service['ten_dichvu'] ?> - Hệ thống đặt lịch khám bệnh</title>
-    <?php if (!empty($service['mota_ngan'])): ?>
-    <meta name="description" content="<?= $service['mota_ngan'] ?>">
-    <?php endif; ?>
-    <link rel="stylesheet" href="assets/css/style.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/chitiet_dichvu.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         /* Custom styles */
         .service-detail-container {
@@ -122,7 +137,7 @@ function formatPrice($price) {
             padding: 30px;
         }
         .service-header h1 {
-            color: #0d6efd;
+            color: var(--primary-color);
             font-weight: 600;
         }
         .service-image {
@@ -131,12 +146,12 @@ function formatPrice($price) {
         }
         .highlight-box {
             background-color: #f8f9fa;
-            border-left: 4px solid #0d6efd;
+            border-left: 4px solid var(--primary-color);
             padding: 20px;
             border-radius: 5px;
         }
         .highlight-box h3 {
-            color: #0d6efd;
+            color: var(--primary-color);
             font-size: 20px;
             margin-bottom: 15px;
         }
@@ -156,8 +171,8 @@ function formatPrice($price) {
             transform: translateY(-5px);
         }
         .package-card.featured {
-            border: 2px solid #0d6efd;
-            box-shadow: 0 5px 20px rgba(13, 110, 253, 0.2);
+            border: 2px solid var(--primary-color);
+            box-shadow: 0 5px 20px rgba(var(--primary-color-rgb), 0.2);
             position: relative;
         }
         .package-card.featured::after {
@@ -165,7 +180,7 @@ function formatPrice($price) {
             position: absolute;
             top: 10px;
             right: -30px;
-            background: #0d6efd;
+            background: var(--primary-color);
             color: white;
             font-size: 12px;
             font-weight: 600;
@@ -186,7 +201,7 @@ function formatPrice($price) {
         .package-header .price {
             font-size: 24px;
             font-weight: 600;
-            color: #0d6efd;
+            color: var(--primary-color);
         }
         .package-body {
             padding: 20px;
@@ -206,7 +221,7 @@ function formatPrice($price) {
             content: "✓";
             position: absolute;
             left: 0;
-            color: #0d6efd;
+            color: var(--primary-color);
             font-weight: 600;
         }
         .process-steps {
@@ -226,7 +241,7 @@ function formatPrice($price) {
         .step-number {
             width: 40px;
             height: 40px;
-            background-color: #0d6efd;
+            background-color: var(--primary-color);
             color: white;
             border-radius: 50%;
             display: flex;
@@ -237,7 +252,7 @@ function formatPrice($price) {
         }
         .step-icon {
             font-size: 40px;
-            color: #0d6efd;
+            color: var(--primary-color);
             margin-bottom: 15px;
         }
         .note-card {
@@ -247,7 +262,7 @@ function formatPrice($price) {
             height: 100%;
         }
         .note-card h4 {
-            color: #0d6efd;
+            color: var(--primary-color);
             margin-bottom: 15px;
         }
         .note-card ul {
@@ -281,6 +296,15 @@ function formatPrice($price) {
             font-size: 18px;
             font-weight: 600;
             margin-bottom: 10px;
+        }
+        :root {
+            --primary-color-rgb: <?php 
+                $hex = ltrim(get_setting('primary_color', '#005bac'), '#');
+                $r = hexdec(substr($hex, 0, 2));
+                $g = hexdec(substr($hex, 2, 2));
+                $b = hexdec(substr($hex, 4, 2));
+                echo "$r,$g,$b";
+            ?>;
         }
     </style>
 </head>
@@ -461,8 +485,12 @@ function formatPrice($price) {
                             <ul>
                                 <li>Thời gian khám: 1-2 giờ</li>
                                 <li>Thời gian có kết quả: 1-3 ngày</li>
-                                <li>Giờ khám: 7:30 - 16:30</li>
-                                <li>Khám từ thứ 2 đến thứ 7</li>
+                                <?php foreach($working_hours as $index => $hour): ?>
+                                    <?php if($index < 2): ?>
+                                    <li><?php echo htmlspecialchars(trim($hour)); ?></li>
+                                    <?php endif; ?>
+                                <?php endforeach; ?>
+                                <li>Khám từ <?php echo $working_days; ?></li>
                             </ul>
                         </div>
                     </div>
