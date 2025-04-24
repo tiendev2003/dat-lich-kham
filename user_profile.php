@@ -1,3 +1,27 @@
+<?php
+session_start();
+require_once 'includes/db_connect.php';
+require_once 'includes/functions.php';
+// Redirect if not logged in
+if (!is_logged_in()) {
+    header('Location: dangnhap.php');
+    exit;
+}
+// Get user and patient data
+$user = get_logged_in_user();
+$patient = get_patient_info($user['id']);
+// Fetch upcoming appointments
+$today = date('Y-m-d');
+$stmt = $conn->prepare("SELECT l.*, b.ho_ten AS doctor_name, c.ten_chuyenkhoa AS specialty FROM lichhen l JOIN bacsi b ON l.bacsi_id=b.id JOIN chuyenkhoa c ON b.chuyenkhoa_id=c.id WHERE l.benhnhan_id=? AND l.trang_thai IN ('pending','confirmed') AND l.ngay_hen>=? ORDER BY l.ngay_hen, l.gio_hen");
+$stmt->bind_param('is', $patient['id'], $today);
+$stmt->execute();
+$appointments_upcoming = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+// Fetch medical records
+$stmt = $conn->prepare("SELECT k.*, l.ngay_hen, b.ho_ten AS doctor_name, c.ten_chuyenkhoa AS specialty FROM ketqua_kham k JOIN lichhen l ON k.lichhen_id=l.id JOIN bacsi b ON l.bacsi_id=b.id JOIN chuyenkhoa c ON b.chuyenkhoa_id=c.id WHERE l.benhnhan_id=? ORDER BY l.ngay_hen DESC");
+$stmt->bind_param('i', $patient['id']);
+$stmt->execute();
+$medical_records = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -166,10 +190,10 @@
                                 <i class="fas fa-camera"></i>
                             </div>
                         </div>
-                        <h2 class="profile-name">Nguyễn Văn A</h2>
+                        <h2 class="profile-name"><?php echo htmlspecialchars($patient['ho_ten']); ?></h2>
                         <p class="profile-info">
-                            <i class="fas fa-envelope"></i> nguyenvana@gmail.com<br>
-                            <i class="fas fa-phone"></i> 0123456789
+                            <i class="fas fa-envelope"></i> <?php echo htmlspecialchars($patient['email']); ?><br>
+                            <i class="fas fa-phone"></i> <?php echo htmlspecialchars($patient['dien_thoai']); ?>
                         </p>
                     </div>
                     <div class="list-group list-group-flush">
@@ -225,43 +249,43 @@
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Họ và tên</div>
-                                            <div class="info-value">Nguyễn Văn A</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['ho_ten']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Ngày sinh</div>
-                                            <div class="info-value">12/05/1990</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['nam_sinh']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Giới tính</div>
-                                            <div class="info-value">Nam</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['gioi_tinh']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Số CMND/CCCD</div>
-                                            <div class="info-value">123456789012</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['cmnd_cccd']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Email</div>
-                                            <div class="info-value">nguyenvana@gmail.com</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['email']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-6">
                                         <div class="info-group">
                                             <div class="info-label">Số điện thoại</div>
-                                            <div class="info-value">0123456789</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['dien_thoai']); ?></div>
                                         </div>
                                     </div>
                                     <div class="col-md-12">
                                         <div class="info-group">
                                             <div class="info-label">Địa chỉ</div>
-                                            <div class="info-value">123 Minh Khai, Quận Hai Bà Trưng, Hà Nội</div>
+                                            <div class="info-value"><?php echo htmlspecialchars($patient['dia_chi']); ?></div>
                                         </div>
                                     </div>
                                 </div>
@@ -270,34 +294,16 @@
                                     <h5>Thông tin sức khỏe cơ bản</h5>
                                     <hr>
                                     <div class="row">
-                                        <div class="col-md-4">
+                                        <div class="col-md-6">
                                             <div class="info-group">
                                                 <div class="info-label">Nhóm máu</div>
-                                                <div class="info-value">O</div>
+                                                <div class="info-value"><?php echo htmlspecialchars($patient['nhom_mau']); ?></div>
                                             </div>
                                         </div>
-                                        <div class="col-md-4">
-                                            <div class="info-group">
-                                                <div class="info-label">Chiều cao</div>
-                                                <div class="info-value">170 cm</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-4">
-                                            <div class="info-group">
-                                                <div class="info-label">Cân nặng</div>
-                                                <div class="info-value">65 kg</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
-                                            <div class="info-group">
-                                                <div class="info-label">Tiền sử bệnh</div>
-                                                <div class="info-value">Huyết áp cao</div>
-                                            </div>
-                                        </div>
-                                        <div class="col-md-12">
+                                        <div class="col-md-6">
                                             <div class="info-group">
                                                 <div class="info-label">Dị ứng</div>
-                                                <div class="info-value">Hải sản, Penicillin</div>
+                                                <div class="info-value"><?php echo htmlspecialchars($patient['di_ung']); ?></div>
                                             </div>
                                         </div>
                                     </div>
@@ -308,71 +314,72 @@
                             <div class="tab-pane fade" id="appointments" role="tabpanel" aria-labelledby="appointments-tab">
                                 <h4 class="mt-3 mb-4">Lịch hẹn sắp tới</h4>
                                 
-                                <!-- Lịch hẹn 1 -->
+                                <?php if (empty($appointments_upcoming)): ?>
+                                <div class="alert alert-info">
+                                    <i class="fas fa-info-circle"></i> Bạn chưa có lịch hẹn nào sắp tới. <a href="datlich.php" class="alert-link">Đặt lịch khám</a> ngay!
+                                </div>
+                                <?php else: ?>
+                                <?php foreach ($appointments_upcoming as $appointment): ?>
                                 <div class="appointment-card">
                                     <div class="appointment-header">
-                                        <div class="appointment-doctor">BS. Nguyễn Thế Lâm - Răng Hàm Mặt</div>
-                                        <div class="appointment-status status-confirmed">Đã xác nhận</div>
+                                        <div class="appointment-doctor">BS. <?php echo htmlspecialchars($appointment['doctor_name']); ?> - <?php echo htmlspecialchars($appointment['specialty']); ?></div>
+                                        <div class="appointment-status status-<?php echo htmlspecialchars($appointment['trang_thai']); ?>">
+                                            <?php 
+                                            $status_text = '';
+                                            switch($appointment['trang_thai']) {
+                                                case 'confirmed': $status_text = 'Đã xác nhận'; break;
+                                                case 'pending': $status_text = 'Chờ xác nhận'; break;
+                                                case 'rescheduled': $status_text = 'Đã đổi lịch'; break;
+                                                default: $status_text = $appointment['trang_thai'];
+                                            }
+                                            echo htmlspecialchars($status_text); 
+                                            ?>
+                                        </div>
                                     </div>
                                     <div class="appointment-details">
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="far fa-calendar-alt"></i></div>
-                                            <div>Thứ 2, 25/04/2025 - 10:30</div>
+                                            <div>Ngày khám: <?php echo htmlspecialchars(date('d/m/Y', strtotime($appointment['ngay_hen']))); ?></div>
+                                        </div>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="far fa-clock"></i></div>
+                                            <div>Giờ khám: <?php echo htmlspecialchars($appointment['gio_hen']); ?></div>
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Phòng khám Lộc Bình - 67 Minh Khai, Lộc Bình, Lạng Sơn</div>
+                                            <div>Phòng khám: <?php echo htmlspecialchars($appointment['phong_kham'] ?? get_setting('site_address')); ?></div>
+                                        </div>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-money-bill-alt"></i></div>
+                                            <div>Phí khám: <?php echo number_format($appointment['phi_kham'] ?? 0, 0, ',', '.'); ?> VNĐ</div>
                                         </div>
                                         <div class="appointment-detail">
                                             <div class="detail-icon"><i class="fas fa-notes-medical"></i></div>
-                                            <div>Khám răng định kỳ</div>
+                                            <div>Lý do khám: <?php echo htmlspecialchars($appointment['ly_do']); ?></div>
                                         </div>
+                                        <?php if (!empty($appointment['ma_lichhen'])): ?>
+                                        <div class="appointment-detail">
+                                            <div class="detail-icon"><i class="fas fa-hashtag"></i></div>
+                                            <div>Mã lịch hẹn: <?php echo htmlspecialchars($appointment['ma_lichhen']); ?></div>
+                                        </div>
+                                        <?php endif; ?>
                                     </div>
                                     <div class="appointment-actions">
-                                        <button class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Chi tiết
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-edit"></i> Thay đổi lịch
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-times"></i> Hủy lịch hẹn
-                                        </button>
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>" class="btn btn-sm btn-outline-primary mb-2">
+                                            <i class="fas fa-eye"></i> Xem chi tiết
+                                        </a>
+                                        <?php if ($appointment['trang_thai'] != 'completed'): ?>
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=reschedule" class="btn btn-sm btn-outline-warning mb-2">
+                                            <i class="fas fa-calendar-alt"></i> Thay đổi lịch
+                                        </a>
+                                        <a href="huy_lichhen.php?id=<?php echo $appointment['id']; ?>&action=cancel" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times-circle"></i> Hủy lịch hẹn
+                                        </a>
+                                        <?php endif; ?>
                                     </div>
                                 </div>
-
-                                <!-- Lịch hẹn 2 -->
-                                <div class="appointment-card">
-                                    <div class="appointment-header">
-                                        <div class="appointment-doctor">BS. Trần Thị Mai - Tim Mạch</div>
-                                        <div class="appointment-status status-pending">Chờ xác nhận</div>
-                                    </div>
-                                    <div class="appointment-details">
-                                        <div class="appointment-detail">
-                                            <div class="detail-icon"><i class="far fa-calendar-alt"></i></div>
-                                            <div>Thứ 4, 27/04/2025 - 14:00</div>
-                                        </div>
-                                        <div class="appointment-detail">
-                                            <div class="detail-icon"><i class="fas fa-map-marker-alt"></i></div>
-                                            <div>Phòng khám Lộc Bình - 67 Minh Khai, Lộc Bình, Lạng Sơn</div>
-                                        </div>
-                                        <div class="appointment-detail">
-                                            <div class="detail-icon"><i class="fas fa-notes-medical"></i></div>
-                                            <div>Khám tim định kỳ</div>
-                                        </div>
-                                    </div>
-                                    <div class="appointment-actions">
-                                        <button class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-eye"></i> Chi tiết
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-warning">
-                                            <i class="fas fa-edit"></i> Thay đổi lịch
-                                        </button>
-                                        <button class="btn btn-sm btn-outline-danger">
-                                            <i class="fas fa-times"></i> Hủy lịch hẹn
-                                        </button>
-                                    </div>
-                                </div>
+                                <?php endforeach; ?>
+                                <?php endif; ?>
 
                                 <div class="text-center mt-4">
                                     <a href="datlich.php" class="btn btn-primary">
@@ -385,15 +392,17 @@
                             <div class="tab-pane fade" id="medical" role="tabpanel" aria-labelledby="medical-tab">
                                 <h4 class="mt-3 mb-4">Hồ sơ bệnh án</h4>
                                 
+                                <?php if (empty($medical_records)): ?>
                                 <div class="alert alert-info">
                                     <i class="fas fa-info-circle"></i> Hồ sơ bệnh án của bạn sẽ được hiển thị tại đây sau khi bạn đã có ít nhất một lần khám bệnh tại cơ sở y tế.
                                 </div>
-
+                                <?php else: ?>
+                                <?php foreach ($medical_records as $record): ?>
                                 <div class="card mb-3">
                                     <div class="card-header bg-white d-flex justify-content-between align-items-center">
                                         <div>
-                                            <strong>Khám răng định kỳ</strong>
-                                            <div class="text-muted small">BS. Nguyễn Thế Lâm - 15/03/2025</div>
+                                            <strong><?php echo htmlspecialchars($record['ly_do']); ?></strong>
+                                            <div class="text-muted small">BS. <?php echo htmlspecialchars($record['doctor_name']); ?> - <?php echo htmlspecialchars(date('d/m/Y', strtotime($record['ngay_hen']))); ?></div>
                                         </div>
                                         <button class="btn btn-sm btn-outline-primary">
                                             <i class="fas fa-file-download"></i> Tải xuống
@@ -401,40 +410,18 @@
                                     </div>
                                     <div class="card-body">
                                         <div class="mb-3">
-                                            <strong>Chẩn đoán:</strong> Viêm nướu nhẹ
+                                            <strong>Chẩn đoán:</strong> <?php echo htmlspecialchars($record['chan_doan']); ?>
                                         </div>
                                         <div class="mb-3">
-                                            <strong>Điều trị:</strong> Lấy cao răng, hướng dẫn vệ sinh răng miệng
+                                            <strong>Điều trị:</strong> <?php echo htmlspecialchars($record['phuong_phap_dieu_tri']); ?>
                                         </div>
                                         <div>
-                                            <strong>Lời dặn:</strong> Đánh răng ít nhất 2 lần/ngày, dùng chỉ nha khoa, tái khám sau 6 tháng
+                                            <strong>Lời dặn:</strong> <?php echo htmlspecialchars($record['loi_dan']); ?>
                                         </div>
                                     </div>
                                 </div>
-
-                                <div class="card mb-3">
-                                    <div class="card-header bg-white d-flex justify-content-between align-items-center">
-                                        <div>
-                                            <strong>Khám tim định kỳ</strong>
-                                            <div class="text-muted small">BS. Trần Thị Mai - 10/02/2025</div>
-                                        </div>
-                                        <button class="btn btn-sm btn-outline-primary">
-                                            <i class="fas fa-file-download"></i> Tải xuống
-                                        </button>
-                                    </div>
-                                    <div class="card-body">
-                                        <div class="mb-3">
-                                            <strong>Chẩn đoán:</strong> Tăng huyết áp nhẹ
-                                        </div>
-                                        <div class="mb-3">
-                                            <strong>Điều trị:</strong> Kê đơn thuốc hạ huyết áp
-                                        </div>
-                                        <div>
-                                            <strong>Lời dặn:</strong> Uống thuốc đều đặn, theo dõi huyết áp hàng ngày, hạn chế ăn mặn, tái khám sau 1 tháng
-                                        </div>
-                                    </div>
-                                </div>
-
+                                <?php endforeach; ?>
+                                <?php endif; ?>
                             </div>
                         </div>
                     </div>
@@ -456,60 +443,48 @@
                         <div class="row">
                             <div class="col-md-6 mb-3">
                                 <label for="name" class="form-label">Họ và tên</label>
-                                <input type="text" class="form-control" id="name" value="Nguyễn Văn A">
+                                <input type="text" class="form-control" id="name" value="<?php echo htmlspecialchars($patient['ho_ten']); ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="birthdate" class="form-label">Ngày sinh</label>
-                                <input type="date" class="form-control" id="birthdate" value="1990-05-12">
+                                <input type="date" class="form-control" id="birthdate" value="<?php echo htmlspecialchars($patient['nam_sinh']); ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="gender" class="form-label">Giới tính</label>
                                 <select class="form-select" id="gender">
-                                    <option value="nam">Nam</option>
-                                    <option value="nu">Nữ</option>
-                                    <option value="khac">Khác</option>
+                                    <option value="nam" <?php echo $patient['gioi_tinh'] === 'Nam' ? 'selected' : ''; ?>>Nam</option>
+                                    <option value="nu" <?php echo $patient['gioi_tinh'] === 'Nữ' ? 'selected' : ''; ?>>Nữ</option>
+                                    <option value="khac" <?php echo $patient['gioi_tinh'] === 'Khác' ? 'selected' : ''; ?>>Khác</option>
                                 </select>
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="id_number" class="form-label">Số CMND/CCCD</label>
-                                <input type="text" class="form-control" id="id_number" value="123456789012">
+                                <input type="text" class="form-control" id="id_number" value="<?php echo htmlspecialchars($patient['cmnd_cccd']); ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="email" class="form-label">Email</label>
-                                <input type="email" class="form-control" id="email" value="nguyenvana@gmail.com">
+                                <input type="email" class="form-control" id="email" value="<?php echo htmlspecialchars($patient['email']); ?>">
                             </div>
                             <div class="col-md-6 mb-3">
                                 <label for="phone" class="form-label">Số điện thoại</label>
-                                <input type="tel" class="form-control" id="phone" value="0123456789">
+                                <input type="tel" class="form-control" id="phone" value="<?php echo htmlspecialchars($patient['dien_thoai']); ?>">
                             </div>
                             <div class="col-md-12 mb-3">
                                 <label for="address" class="form-label">Địa chỉ</label>
-                                <input type="text" class="form-control" id="address" value="123 Minh Khai, Quận Hai Bà Trưng, Hà Nội">
+                                <input type="text" class="form-control" id="address" value="<?php echo htmlspecialchars($patient['dia_chi']); ?>">
                             </div>
-                            <div class="col-md-4 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="blood_type" class="form-label">Nhóm máu</label>
                                 <select class="form-select" id="blood_type">
-                                    <option value="A">A</option>
-                                    <option value="B">B</option>
-                                    <option value="AB">AB</option>
-                                    <option value="O" selected>O</option>
+                                    <option value="A" <?php echo $patient['nhom_mau'] === 'A' ? 'selected' : ''; ?>>A</option>
+                                    <option value="B" <?php echo $patient['nhom_mau'] === 'B' ? 'selected' : ''; ?>>B</option>
+                                    <option value="AB" <?php echo $patient['nhom_mau'] === 'AB' ? 'selected' : ''; ?>>AB</option>
+                                    <option value="O" <?php echo $patient['nhom_mau'] === 'O' ? 'selected' : ''; ?>>O</option>
                                 </select>
                             </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="height" class="form-label">Chiều cao (cm)</label>
-                                <input type="number" class="form-control" id="height" value="170">
-                            </div>
-                            <div class="col-md-4 mb-3">
-                                <label for="weight" class="form-label">Cân nặng (kg)</label>
-                                <input type="number" class="form-control" id="weight" value="65">
-                            </div>
-                            <div class="col-md-12 mb-3">
-                                <label for="medical_history" class="form-label">Tiền sử bệnh</label>
-                                <textarea class="form-control" id="medical_history" rows="2">Huyết áp cao</textarea>
-                            </div>
-                            <div class="col-md-12 mb-3">
+                            <div class="col-md-6 mb-3">
                                 <label for="allergies" class="form-label">Dị ứng</label>
-                                <textarea class="form-control" id="allergies" rows="2">Hải sản, Penicillin</textarea>
+                                <textarea class="form-control" id="allergies" rows="2"><?php echo htmlspecialchars($patient['di_ung']); ?></textarea>
                             </div>
                         </div>
                     </form>
@@ -530,7 +505,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Mở modal chỉnh sửa khi nhấn nút
-            document.querySelector('.btn-outline-primary').addEventListener('click', function() {
+            document.querySelector('#info .btn-outline-primary').addEventListener('click', function() {
                 var editModal = new bootstrap.Modal(document.getElementById('editProfileModal'));
                 editModal.show();
             });

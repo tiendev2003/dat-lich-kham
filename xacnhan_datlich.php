@@ -1,3 +1,30 @@
+<?php
+session_start();
+require_once 'includes/db_connect.php';
+require_once 'includes/functions.php';
+
+if (!isset($_GET['ma_lichhen'])) {
+    header('Location: index.php');
+    exit;
+}
+$ma_lichhen = $_GET['ma_lichhen'];
+$stmt = $conn->prepare(
+    "SELECT l.*, bn.ho_ten AS bn_hoten, bn.dien_thoai AS bn_phone, b.ho_ten AS bs_hoten, ds.ten_dichvu, ds.gia_coban 
+     FROM lichhen l 
+     LEFT JOIN benhnhan bn ON l.benhnhan_id = bn.id 
+     LEFT JOIN bacsi b ON l.bacsi_id = b.id 
+     LEFT JOIN dichvu ds ON l.dichvu_id = ds.id 
+     WHERE l.ma_lichhen = ?"
+);
+$stmt->bind_param("s", $ma_lichhen);
+$stmt->execute();
+$res = $stmt->get_result();
+$booking = $res->fetch_assoc();
+
+$ngay = date('l, d/m/Y', strtotime($booking['ngay_hen']));
+$gio = date('H:i', strtotime($booking['gio_hen']));
+$gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -205,19 +232,19 @@
                                     <img src="assets/img/bsi_rang.jpg" alt="Bác sĩ">
                                 </div>
                                 <div>
-                                    <div class="doctor-name">BS. Nguyễn Thế Lâm</div>
+                                    <div class="doctor-name"><?php echo $booking['bs_hoten']; ?></div>
                                     <div class="doctor-specialty">Chuyên khoa Răng Hàm Mặt</div>
                                 </div>
                             </div>
 
                             <div class="summary-item">
                                 <div class="summary-label"><i class="far fa-calendar-alt me-2"></i>Ngày khám:</div>
-                                <div class="summary-value">Thứ 2, 25/04/2025</div>
+                                <div class="summary-value"><?php echo $ngay; ?></div>
                             </div>
                             
                             <div class="summary-item">
                                 <div class="summary-label"><i class="far fa-clock me-2"></i>Giờ khám:</div>
-                                <div class="summary-value">10:30 - 11:00</div>
+                                <div class="summary-value"><?php echo $gio; ?></div>
                             </div>
 
                             <div class="summary-item">
@@ -232,22 +259,22 @@
 
                             <div class="summary-item">
                                 <div class="summary-label"><i class="fas fa-stethoscope me-2"></i>Dịch vụ khám:</div>
-                                <div class="summary-value">Khám răng định kỳ</div>
+                                <div class="summary-value"><?php echo $booking['ten_dichvu']; ?></div>
                             </div>
 
                             <div class="summary-item">
                                 <div class="summary-label"><i class="fas fa-user me-2"></i>Bệnh nhân:</div>
-                                <div class="summary-value">Nguyễn Văn A</div>
+                                <div class="summary-value"><?php echo $booking['bn_hoten']; ?></div>
                             </div>
 
                             <div class="summary-item">
                                 <div class="summary-label"><i class="fas fa-phone me-2"></i>Số điện thoại:</div>
-                                <div class="summary-value">0123456789</div>
+                                <div class="summary-value"><?php echo $booking['bn_phone']; ?></div>
                             </div>
 
                             <div class="summary-item">
                                 <div class="summary-label"><i class="fas fa-notes-medical me-2"></i>Triệu chứng:</div>
-                                <div class="summary-value">Đau răng hàm bên phải, ê buốt khi ăn đồ lạnh</div>
+                                <div class="summary-value"><?php echo $booking['ly_do']; ?></div>
                             </div>
                         </div>
 
@@ -262,7 +289,7 @@
                             <div class="price-details">
                                 <div class="price-row">
                                     <span>Giá khám</span>
-                                    <span>500.000đ</span>
+                                    <span><?php echo $gia_kham; ?></span>
                                 </div>
                                 <div class="price-row">
                                     <span>Phí đặt lịch</span>
@@ -270,7 +297,7 @@
                                 </div>
                                 <div class="price-row total">
                                     <span>Tổng cộng</span>
-                                    <span>500.000đ</span>
+                                    <span><?php echo $gia_kham; ?></span>
                                 </div>
                             </div>
                         </div>
@@ -285,7 +312,7 @@
                         </div>
 
                         <div class="mt-4">
-                            <p class="text-center text-muted">Mã lịch hẹn: <span class="fw-bold">APT25042025103</span></p>
+                            <p class="text-center text-muted">Mã lịch hẹn: <span class="fw-bold"><?php echo $booking['ma_lichhen']; ?></span></p>
                         </div>
                     </div>
                 </div>

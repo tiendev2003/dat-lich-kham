@@ -1,3 +1,56 @@
+<?php
+// Kết nối database
+$db_already_connected = false;
+require_once 'admin/includes/db_connect.php';
+
+// Xử lý lọc theo chuyên khoa
+$specialty_id = isset($_GET['specialty']) ? (int)$_GET['specialty'] : 0;
+
+// Xử lý phân trang
+$page = isset($_GET['page']) ? (int)$_GET['page'] : 1;
+$items_per_page = 6;
+$offset = ($page - 1) * $items_per_page;
+
+// Lấy danh sách chuyên khoa cho bộ lọc
+$specialties_sql = "SELECT * FROM chuyenkhoa ORDER BY ten_chuyenkhoa";
+$specialties_result = $conn->query($specialties_sql);
+$specialties = [];
+
+if ($specialties_result && $specialties_result->num_rows > 0) {
+    while ($row = $specialties_result->fetch_assoc()) {
+        $specialties[] = $row;
+    }
+}
+
+// Điều kiện lọc theo chuyên khoa
+$where_clause = "";
+if ($specialty_id > 0) {
+    $where_clause = "WHERE chuyenkhoa_id = $specialty_id";
+}
+
+// Lấy tổng số bác sĩ
+$count_sql = "SELECT COUNT(*) as total FROM bacsi $where_clause";
+$count_result = $conn->query($count_sql);
+$count_data = $count_result->fetch_assoc();
+$total_items = $count_data['total'];
+$total_pages = ceil($total_items / $items_per_page);
+
+// Lấy danh sách bác sĩ với phân trang
+$doctors_sql = "SELECT b.*, ck.ten_chuyenkhoa 
+                FROM bacsi b 
+                LEFT JOIN chuyenkhoa ck ON b.chuyenkhoa_id = ck.id 
+                $where_clause 
+                ORDER BY b.ho_ten 
+                LIMIT $offset, $items_per_page";
+$doctors_result = $conn->query($doctors_sql);
+$doctors = [];
+
+if ($doctors_result && $doctors_result->num_rows > 0) {
+    while ($row = $doctors_result->fetch_assoc()) {
+        $doctors[] = $row;
+    }
+}
+?>
 <!DOCTYPE html>
 <html lang="vi">
 <head>
@@ -5,7 +58,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Đội ngũ bác sĩ - Hệ thống đặt lịch khám bệnh</title>
     <link rel="stylesheet" href="assets/css/style.css">
-
     <link rel="stylesheet" href="assets/css/pages/doctors.css">
     <!-- Bootstrap CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
@@ -20,115 +72,87 @@
     <section class="doctor-list">
         <div class="container">
             <h1 class="page-title">Đội ngũ bác sĩ</h1>
-            <div class="row">
-                <!-- Doctor 1 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_rang.jpg" alt="Bác sĩ Nguyễn Thế Lâm">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Nguyễn Thế Lâm</h3>
-                            <p class="specialty">Chuyên khoa Răng Hàm Mặt</p>
-                            <p class="experience">Hơn 15 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                                <a href="chitiet_bacsi.php.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                                <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                                </div>
-                        </div>
+            
+            <!-- Filters -->
+            <div class="doctor-filters mb-4">
+                <form action="" method="GET" class="row g-3">
+                    <div class="col-md-4">
+                        <label for="specialty" class="form-label">Chuyên khoa</label>
+                        <select name="specialty" id="specialty" class="form-select" onchange="this.form.submit()">
+                            <option value="0">Tất cả chuyên khoa</option>
+                            <?php foreach ($specialties as $specialty): ?>
+                                <option value="<?= $specialty['id'] ?>" <?= $specialty_id == $specialty['id'] ? 'selected' : '' ?>>
+                                    <?= $specialty['ten_chuyenkhoa'] ?>
+                                </option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
-                </div>
-
-                <!-- Doctor 2 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_hohap.jpg" alt="Bác sĩ Trần Thị B">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Trần Thị B</h3>
-                            <p class="specialty">Chuyên khoa Hô Hấp</p>
-                            <p class="experience">Hơn 12 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                            <a href="chitiet_bacsi.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                            <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Doctor 3 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_timmach.jpg" alt="Bác sĩ Lê Văn C">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Lê Văn C</h3>
-                            <p class="specialty">Chuyên khoa Tim Mạch</p>
-                            <p class="experience">Hơn 20 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                            <a href="chitiet_bacsi.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                            <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Doctor 4 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_dalieu.jpg" alt="Bác sĩ Phạm Thị D">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Phạm Thị D</h3>
-                            <p class="specialty">Chuyên khoa Da Liễu</p>
-                            <p class="experience">Hơn 10 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                            <a href="chitiet_bacsi.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                            <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Doctor 5 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_xetnghiem.png" alt="Bác sĩ Hoàng Văn E">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Hoàng Văn E</h3>
-                            <p class="specialty">Chuyên khoa Xét Nghiệm</p>
-                            <p class="experience">Hơn 8 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                            <a href="chitiet_bacsi.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                            <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Doctor 6 -->
-                <div class="col-md-4 mb-4">
-                    <div class="doctor-card">
-                        <div class="doctor-image">
-                            <img src="assets/img/bsi_mat.jpg" alt="Bác sĩ Vũ Thị F">
-                        </div>
-                        <div class="doctor-info">
-                            <h3>BS. Vũ Thị F</h3>
-                            <p class="specialty">Chuyên khoa Mắt</p>
-                            <p class="experience">Hơn 15 năm kinh nghiệm</p>
-                            <div class="doctor-actions">
-                            <a href="chitiet_bacsi.php" class="btn btn-outline-primary">Xem chi tiết</a>
-                            <a href="datlich.php" class="btn btn-primary">Đặt lịch khám</a>
-                            </div>
-                        </div>
-                    </div>
-                </div>
+                </form>
             </div>
+            
+            <div class="row">
+                <?php if (count($doctors) > 0): ?>
+                    <?php foreach ($doctors as $doctor): ?>
+                    <div class="col-md-4 mb-4">
+                        <div class="doctor-card">
+                            <div class="doctor-image">
+                                <?php if (!empty($doctor['hinh_anh'])): ?>
+                                    <img src="<?= $doctor['hinh_anh'] ?>" alt="<?= $doctor['ho_ten'] ?>">
+                                <?php else: ?>
+                                    <img src="assets/img/doctor-default.jpg" alt="<?= $doctor['ho_ten'] ?>">
+                                <?php endif; ?>
+                            </div>
+                            <div class="doctor-info">
+                                <h3><?= $doctor['ho_ten'] ?></h3>
+                                <p class="specialty">Chuyên khoa <?= $doctor['ten_chuyenkhoa'] ?? 'Đa khoa' ?></p>
+                                <p class="experience">
+                                    <?php 
+                                    echo !empty($doctor['kinh_nghiem']) 
+                                        ? $doctor['kinh_nghiem'] 
+                                        : 'Bác sĩ chuyên khoa';
+                                    ?>
+                                </p>
+                                <div class="doctor-actions">
+                                    <a href="chitiet_bacsi.php?id=<?= $doctor['id'] ?>" class="btn btn-outline-primary">Xem chi tiết</a>
+                                    <a href="datlich.php?doctor_id=<?= $doctor['id'] ?>" class="btn btn-primary">Đặt lịch khám</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <?php endforeach; ?>
+                <?php else: ?>
+                    <div class="col-12">
+                        <div class="alert alert-info text-center">
+                            Không tìm thấy bác sĩ phù hợp với tiêu chí tìm kiếm. Vui lòng thử lại với tiêu chí khác.
+                        </div>
+                    </div>
+                <?php endif; ?>
+            </div>
+            
+            <!-- Pagination -->
+            <?php if ($total_pages > 1): ?>
+            <nav aria-label="Page navigation" class="mt-4">
+                <ul class="pagination justify-content-center">
+                    <li class="page-item <?= ($page <= 1) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= ($page-1) ?>&specialty=<?= $specialty_id ?>" aria-label="Previous">
+                            <span aria-hidden="true">&laquo;</span>
+                        </a>
+                    </li>
+                    
+                    <?php for($i = 1; $i <= $total_pages; $i++): ?>
+                        <li class="page-item <?= ($page == $i) ? 'active' : '' ?>">
+                            <a class="page-link" href="?page=<?= $i ?>&specialty=<?= $specialty_id ?>"><?= $i ?></a>
+                        </li>
+                    <?php endfor; ?>
+                    
+                    <li class="page-item <?= ($page >= $total_pages) ? 'disabled' : '' ?>">
+                        <a class="page-link" href="?page=<?= ($page+1) ?>&specialty=<?= $specialty_id ?>" aria-label="Next">
+                            <span aria-hidden="true">&raquo;</span>
+                        </a>
+                    </li>
+                </ul>
+            </nav>
+            <?php endif; ?>
         </div>
     </section>
 
@@ -139,4 +163,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
-</html> 
+</html>

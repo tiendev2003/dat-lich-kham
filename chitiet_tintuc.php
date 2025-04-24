@@ -1,9 +1,69 @@
+<?php
+// Kết nối database
+$db_already_connected = false;
+require_once 'admin/includes/db_connect.php';
+require_once 'admin/crud/tintuc_crud.php';
+
+// Lấy ID tin tức từ tham số URL
+$news_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
+
+// Nếu không có ID hợp lệ, chuyển hướng về trang tin tức
+if ($news_id <= 0) {
+    header('Location: tintuc.php');
+    exit;
+}
+
+// Lấy thông tin chi tiết tin tức
+$news_detail = getNewsById($news_id);
+
+// Nếu không tìm thấy tin tức hoặc tin chưa được xuất bản, chuyển hướng về trang tin tức
+if (!$news_detail || $news_detail['trang_thai'] !== 'published') {
+    header('Location: tintuc.php');
+    exit;
+}
+
+// Cập nhật lượt xem
+global $conn;
+$conn->query("UPDATE tintuc SET luot_xem = luot_xem + 1 WHERE id = {$news_id}");
+
+// Lấy tin tức liên quan (cùng danh mục)
+$related_filter = [
+    'category' => $news_detail['danh_muc'],
+    'status' => 'published'
+];
+$related_news = getAllNews($related_filter);
+
+// Loại bỏ tin tức hiện tại khỏi danh sách liên quan
+$related_news = array_filter($related_news, function($item) use ($news_id) {
+    return $item['id'] != $news_id;
+});
+
+// Giới hạn số tin liên quan hiển thị
+$related_news = array_slice($related_news, 0, 2);
+
+// Lấy các tin tức mới nhất
+$latest_filter = [
+    'status' => 'published'
+];
+$latest_news = getAllNews($latest_filter);
+$latest_news = array_slice($latest_news, 0, 5);
+
+// Format date
+function formatDate($date) {
+    if (!$date) return 'N/A';
+    return date('d/m/Y', strtotime($date));
+}
+?>
+
 <!DOCTYPE html>
 <html lang="vi">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hệ thống đặt lịch khám bệnh</title>
+    <title><?= $news_detail['tieu_de'] ?> - Hệ thống đặt lịch khám bệnh</title>
+    <?php if (!empty($news_detail['meta_description'])): ?>
+    <meta name="description" content="<?= $news_detail['meta_description'] ?>">
+    <?php endif; ?>
     <link rel="stylesheet" href="assets/css/style.css">
     <link rel="stylesheet" href="assets/css/pages/chitiet_tintuc.css">
 
@@ -24,7 +84,7 @@
                 <ol class="breadcrumb">
                     <li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li>
                     <li class="breadcrumb-item"><a href="tintuc.php">Tin tức</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Phòng ngừa các bệnh hô hấp mùa nắng nóng</li>
+                    <li class="breadcrumb-item active" aria-current="page"><?= $news_detail['tieu_de'] ?></li>
                 </ol>
             </nav>
 
@@ -32,93 +92,63 @@
                 <!-- Main Content -->
                 <div class="col-lg-8">
                     <article class="news-content">
-                        <h1 class="news-title">Phòng ngừa các bệnh hô hấp mùa nắng nóng</h1>
+                        <h1 class="news-title"><?= $news_detail['tieu_de'] ?></h1>
                         
                         <div class="news-meta">
-                            <span class="date"><i class="far fa-calendar-alt"></i> 15/03/2024</span>
-                            <span class="author"><i class="far fa-user"></i> Bs. Nguyễn Văn A</span>
-                            <span class="category"><i class="far fa-folder"></i> Sức khỏe</span>
+                            <span class="date"><i class="far fa-calendar-alt"></i> <?= formatDate($news_detail['ngay_dang']) ?></span>
+                            <span class="category"><i class="far fa-folder"></i> <?= ucfirst($news_detail['danh_muc']) ?></span>
+                            <span class="views"><i class="far fa-eye"></i> <?= $news_detail['luot_xem'] ?? 0 ?> lượt xem</span>
                         </div>
 
+                        <?php if (!empty($news_detail['hinh_anh'])): ?>
                         <div class="news-featured-image">
-                            <img src="assets/img/blog_hohap.jpg" alt="Phòng ngừa bệnh hô hấp">
+                            <img src="<?= $news_detail['hinh_anh'] ?>" alt="<?= $news_detail['tieu_de'] ?>">
                         </div>
+                        <?php endif; ?>
 
                         <div class="news-text">
-                            <p class="lead">
-                                Mùa nắng nóng là thời điểm các bệnh về đường hô hấp có nguy cơ bùng phát cao. 
-                                Bài viết này sẽ cung cấp những thông tin hữu ích giúp bạn và gia đình phòng ngừa hiệu quả.
-                            </p>
-
-                            <h2>1. Nguyên nhân gây bệnh hô hấp mùa nắng nóng</h2>
-                            <p>
-                                Thời tiết nắng nóng có thể gây ra nhiều vấn đề về đường hô hấp do:
-                            </p>
-                            <ul>
-                                <li>Sự chênh lệch nhiệt độ giữa trong nhà và ngoài trời</li>
-                                <li>Không khí ô nhiễm và bụi bẩn</li>
-                                <li>Virus và vi khuẩn phát triển mạnh</li>
-                            </ul>
-
-                            <h2>2. Các biện pháp phòng ngừa</h2>
-                            <p>
-                                Để phòng ngừa các bệnh hô hấp trong mùa nắng nóng, bạn nên:
-                            </p>
-                            <ul>
-                                <li>Giữ nhiệt độ phòng ổn định</li>
-                                <li>Uống đủ nước</li>
-                                <li>Đeo khẩu trang khi ra ngoài</li>
-                                <li>Vệ sinh mũi họng thường xuyên</li>
-                            </ul>
-
-                            <div class="news-quote">
-                                <blockquote>
-                                    "Phòng bệnh hơn chữa bệnh. Việc thực hiện các biện pháp phòng ngừa đơn giản 
-                                    nhưng hiệu quả sẽ giúp bảo vệ sức khỏe của bạn và gia đình."
-                                </blockquote>
-                                <cite>- TS.BS Nguyễn Văn A -</cite>
-                            </div>
-
-                            <h2>3. Khi nào cần đến bác sĩ?</h2>
-                            <p>
-                                Bạn nên đến gặp bác sĩ khi có các triệu chứng sau:
-                            </p>
-                            <ul>
-                                <li>Ho kéo dài trên 2 tuần</li>
-                                <li>Khó thở, tức ngực</li>
-                                <li>Sốt cao không giảm</li>
-                            </ul>
+                            <?= $news_detail['noi_dung'] ?>
                         </div>
 
+                        <?php if (!empty($news_detail['tags'])): ?>
                         <div class="news-tags">
                             <i class="fas fa-tags"></i>
-                            <a href="#">Sức khỏe</a>
-                            <a href="#">Hô hấp</a>
-                            <a href="#">Mùa nắng</a>
-                            <a href="#">Phòng bệnh</a>
+                            <?php 
+                            $tags = explode(',', $news_detail['tags']);
+                            foreach($tags as $tag): 
+                                $tag = trim($tag);
+                                if(!empty($tag)):
+                            ?>
+                                <a href="tintuc.php?tag=<?= urlencode($tag) ?>"><?= $tag ?></a>
+                            <?php 
+                                endif;
+                            endforeach; 
+                            ?>
                         </div>
+                        <?php endif; ?>
                     </article>
 
                     <!-- Related News -->
+                    <?php if (count($related_news) > 0): ?>
                     <div class="related-news">
                         <h3>Tin tức liên quan</h3>
                         <div class="row">
+                            <?php foreach($related_news as $related): ?>
                             <div class="col-md-6">
                                 <div class="related-news-item">
-                                    <img src="assets/img/news2.jpg" alt="Tin liên quan">
-                                    <h4><a href="#">Chế độ ăn tốt cho người bệnh hô hấp</a></h4>
-                                    <span class="date">14/03/2024</span>
+                                    <?php if(!empty($related['hinh_anh'])): ?>
+                                    <img src="<?= $related['hinh_anh'] ?>" alt="<?= $related['tieu_de'] ?>">
+                                    <?php else: ?>
+                                    <img src="assets/img/news2.jpg" alt="<?= $related['tieu_de'] ?>">
+                                    <?php endif; ?>
+                                    <h4><a href="chitiet_tintuc.php?id=<?= $related['id'] ?>"><?= $related['tieu_de'] ?></a></h4>
+                                    <span class="date"><?= formatDate($related['ngay_dang']) ?></span>
                                 </div>
                             </div>
-                            <div class="col-md-6">
-                                <div class="related-news-item">
-                                    <img src="assets/img/news3.jpg" alt="Tin liên quan">
-                                    <h4><a href="#">Tập thể dục đúng cách trong mùa nắng</a></h4>
-                                    <span class="date">13/03/2024</span>
-                                </div>
-                            </div>
+                            <?php endforeach; ?>
                         </div>
                     </div>
+                    <?php endif; ?>
                 </div>
 
                 <!-- Sidebar -->
@@ -127,16 +157,22 @@
                     <div class="sidebar-widget latest-news">
                         <h3>Tin mới nhất</h3>
                         <ul>
-                            <li>
-                                <a href="#">
-                                    <img src="assets/img/news4.jpg" alt="Tin mới">
-                                    <div class="news-info">
-                                        <h4>Dinh dưỡng cho trẻ mùa nắng nóng</h4>
-                                        <span class="date">12/03/2024</span>
-                                    </div>
-                                </a>
-                            </li>
-                            <!-- Thêm các tin tức khác -->
+                            <?php foreach($latest_news as $latest): ?>
+                                <?php if($latest['id'] == $news_id) continue; // Skip current article ?>
+                                <li>
+                                    <a href="chitiet_tintuc.php?id=<?= $latest['id'] ?>">
+                                        <?php if(!empty($latest['hinh_anh'])): ?>
+                                            <img src="<?= $latest['hinh_anh'] ?>" alt="<?= $latest['tieu_de'] ?>">
+                                        <?php else: ?>
+                                            <img src="assets/img/news4.jpg" alt="<?= $latest['tieu_de'] ?>">
+                                        <?php endif; ?>
+                                        <div class="news-info">
+                                            <h4><?= $latest['tieu_de'] ?></h4>
+                                            <span class="date"><?= formatDate($latest['ngay_dang']) ?></span>
+                                        </div>
+                                    </a>
+                                </li>
+                            <?php endforeach; ?>
                         </ul>
                     </div>
 
@@ -144,10 +180,19 @@
                     <div class="sidebar-widget categories">
                         <h3>Chuyên mục</h3>
                         <ul>
-                            <li><a href="#">Sức khỏe tổng quát <span>(15)</span></a></li>
-                            <li><a href="#">Dinh dưỡng <span>(8)</span></a></li>
-                            <li><a href="#">Bệnh mùa nắng <span>(12)</span></a></li>
-                            <li><a href="#">Tư vấn sức khỏe <span>(10)</span></a></li>
+                            <?php
+                            // Lấy danh sách các danh mục và đếm số tin tức trong mỗi danh mục
+                            global $conn;
+                            $categories_query = "SELECT danh_muc, COUNT(*) as count FROM tintuc WHERE trang_thai = 'published' GROUP BY danh_muc";
+                            $categories_result = $conn->query($categories_query);
+                            while($category = $categories_result->fetch_assoc()):
+                            ?>
+                                <li>
+                                    <a href="tintuc.php?category=<?= urlencode($category['danh_muc']) ?>">
+                                        <?= ucfirst($category['danh_muc']) ?> <span>(<?= $category['count'] ?>)</span>
+                                    </a>
+                                </li>
+                            <?php endwhile; ?>
                         </ul>
                     </div>
 
@@ -155,8 +200,8 @@
                     <div class="sidebar-widget newsletter">
                         <h3>Đăng ký nhận tin</h3>
                         <p>Nhận thông tin sức khỏe mới nhất qua email</p>
-                        <form>
-                            <input type="email" placeholder="Email của bạn">
+                        <form id="newsletterForm">
+                            <input type="email" placeholder="Email của bạn" required>
                             <button type="submit" class="btn btn-primary">Đăng ký</button>
                         </form>
                     </div>
@@ -172,4 +217,4 @@
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script src="assets/js/main.js"></script>
 </body>
-</html> 
+</html>

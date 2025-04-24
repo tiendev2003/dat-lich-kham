@@ -1,5 +1,8 @@
 <?php
-session_start();
+// Only start session if one hasn't been started already
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 $base_url = '/dat-lich-kham/'; // Thay đổi theo đường dẫn thực tế của dự án của bạn
 
 ?>
