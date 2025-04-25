@@ -7,6 +7,7 @@ session_start();
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy ID chuyên khoa từ tham số URL
 $specialty_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -66,6 +67,9 @@ function formatDescription($text) {
     if (empty($text)) return '';
     return nl2br(htmlspecialchars($text));
 }
+
+// Prepare subtitle for banner
+$banner_subtitle = "Chăm sóc sức khỏe toàn diện với đội ngũ bác sĩ giàu kinh nghiệm";
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -73,22 +77,8 @@ function formatDescription($text) {
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/chuyenkhoa_chitiet.css">
     <style>
-        .specialty-header {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), 
-                        url('<?= !empty($specialty['hinh_anh']) ? $specialty['hinh_anh'] : 'assets/img/specialty-default.jpg' ?>');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 80px 0 60px;
-            position: relative;
-            text-align: center;
-        }
-        .specialty-icon {
-            font-size: 60px;
-            margin-bottom: 20px;
-        }
         .specialty-content {
-            padding: 50px 0;
+            padding: 40px 0;
         }
         .specialty-description {
             margin-bottom: 40px;
@@ -202,48 +192,6 @@ function formatDescription($text) {
             padding: 40px 0;
             text-align: center;
         }
-        .patient-review {
-            background-color: #fff;
-            border-radius: 10px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
-        }
-        .review-header {
-            display: flex;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-        .reviewer-avatar {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            overflow: hidden;
-            margin-right: 15px;
-        }
-        .reviewer-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-        }
-        .reviewer-info {
-            flex-grow: 1;
-        }
-        .reviewer-name {
-            font-weight: 600;
-            margin-bottom: 3px;
-        }
-        .review-date {
-            font-size: 12px;
-            color: #6c757d;
-        }
-        .review-rating {
-            color: #ffc107;
-        }
-        .review-content {
-            margin-top: 10px;
-            font-style: italic;
-        }
         :root {
             --primary-color-rgb: <?php 
                 $hex = ltrim(get_setting('primary_color', '#005bac'), '#');
@@ -259,16 +207,12 @@ function formatDescription($text) {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Specialty Header -->
-    <section class="specialty-header">
-        <div class="container">
-            <div class="specialty-icon">
-                <i class="fas <?= !empty($specialty['icon']) ? $specialty['icon'] : 'fa-stethoscope' ?>"></i>
-            </div>
-            <h1><?= $specialty['ten_chuyenkhoa'] ?></h1>
-            <p class="lead">Chăm sóc sức khỏe toàn diện với đội ngũ bác sĩ giàu kinh nghiệm</p>
-        </div>
-    </section>
+    <!-- Banner -->
+    <?php display_page_banner(
+        "Chuyên khoa " . $specialty['ten_chuyenkhoa'], 
+        $banner_subtitle,
+        !empty($specialty['hinh_anh']) ? $specialty['hinh_anh'] : ''
+    ); ?>
 
     <!-- Specialty Content -->
     <section class="specialty-content">

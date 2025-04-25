@@ -22,6 +22,13 @@ unset($_SESSION['register_success']);
 
 // Kiểm tra cookie ghi nhớ đăng nhập
 $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email'] : '';
+
+// Lấy cài đặt hệ thống
+$site_name = get_setting('site_name', 'Phòng khám Lộc Bình');
+$primary_color = get_setting('primary_color', '#005bac');
+$secondary_color = get_setting('secondary_color', '#6c757d');
+$accent_color = get_setting('accent_color', '#28a745');
+$font_family = get_setting('font_family', 'Roboto, sans-serif');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -29,17 +36,19 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đăng ký & Đăng nhập</title>
+    <title>Đăng ký & Đăng nhập - <?php echo $site_name; ?></title>
     <!-- Bootstrap 5 CSS -->
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <!-- Favicon -->
+    <?php echo display_favicon(); ?>
     <!-- Custom CSS -->
     <style>
         :root {
-            --primary-color: #2a9d8f;
-            --secondary-color: #264653;
-            --accent-color: #e9c46a;
+            --primary-color: <?php echo $primary_color; ?>;
+            --secondary-color: <?php echo $secondary_color; ?>;
+            --accent-color: <?php echo $accent_color; ?>;
             --light-color: #f8f9fa;
             --dark-color: #343a40;
         }
@@ -51,7 +60,7 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
         }
 
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            font-family: <?php echo $font_family; ?>;
             background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
             min-height: 100vh;
             display: flex;
@@ -131,7 +140,7 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
 
         .form-control:focus {
             border-color: var(--primary-color);
-            box-shadow: 0 0 0 0.2rem rgba(42, 157, 143, 0.25);
+            box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
         }
 
         .btn-primary {
@@ -144,9 +153,9 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
         }
 
         .btn-primary:hover {
-            background: #21867a;
+            background: var(--accent-color);
             transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(42, 157, 143, 0.3);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
         }
 
         .social-login .btn {
@@ -242,7 +251,7 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
 
         .gender-option input:checked+label {
             border-color: var(--primary-color);
-            background: rgba(42, 157, 143, 0.1);
+            background: rgba(0, 123, 255, 0.1);
             color: var(--primary-color);
         }
 
@@ -370,6 +379,12 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
                 </div>
             <?php endif; ?>
             
+            <div class="text-center mb-4">
+                <?php echo display_logo('img-fluid mb-3', 80); ?>
+                <h4 class="text-center mb-0"><?php echo $site_name; ?></h4>
+                <p class="text-muted"><?php echo get_setting('site_description', 'Chăm sóc sức khỏe toàn diện'); ?></p>
+            </div>
+            
             <form id="loginForm" class="needs-validation" action="process_login.php" method="POST" novalidate>
                 <div class="floating-label">
                     <input type="email" class="form-control" id="login-email" name="email" placeholder=" " value="<?php echo $remembered_email; ?>" required>
@@ -408,6 +423,12 @@ $remembered_email = isset($_COOKIE['remember_email']) ? $_COOKIE['remember_email
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
             <?php endif; ?>
+            
+            <div class="text-center mb-4">
+                <?php echo display_logo('img-fluid mb-3', 80); ?>
+                <h4 class="text-center">Đăng ký tài khoản mới</h4>
+                <p class="text-muted">Tạo tài khoản để đặt lịch khám dễ dàng</p>
+            </div>
             
             <form id="registerForm" class="needs-validation" action="process_register.php" method="POST" novalidate>
                 <!-- Step Progress Indicators -->

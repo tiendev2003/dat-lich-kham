@@ -2,6 +2,7 @@
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Chuyên khoa';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Kết nối database
 $db_already_connected = false;
@@ -29,15 +30,48 @@ if ($result && $result->num_rows > 0) {
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/chuyenkhoa.css">
     <style>
-        .specialties-banner {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)),
-                        url('<?php echo !empty($specialties_banner) ? $specialties_banner : 'assets/img/specialties-banner.jpg'; ?>');
-            background-size: cover;
-            background-position: center;
-            padding: 80px 0;
-            margin-bottom: 40px;
-            color: #fff;
-            text-align: center;
+        .specialty-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border-radius: 10px;
+            overflow: hidden;
+            background-color: #fff;
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+            height: 100%;
+            padding: 25px;
+        }
+        
+        .specialty-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+        }
+        
+        .specialty-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .specialty-icon img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+        
+        .specialty-icon i {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+        
+        .specialty-card h3 {
+            font-size: 18px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
         }
     </style>
 </head>
@@ -45,16 +79,15 @@ if ($result && $result->num_rows > 0) {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Banner Section -->
-    <div class="specialties-banner">
-        <div class="container">
-            <h1 class="display-4"><?php echo htmlspecialchars($specialties_title); ?></h1>
-            <p class="lead"><?php echo htmlspecialchars($specialties_subtitle); ?></p>
-        </div>
-    </div>
+    <!-- Banner -->
+    <?php display_page_banner(
+        htmlspecialchars($specialties_title), 
+        htmlspecialchars($specialties_subtitle), 
+        !empty($specialties_banner) ? $specialties_banner : ''
+    ); ?>
 
     <!-- Specialties Section -->
-    <section class="specialties">
+    <section class="specialties py-5">
         <div class="container">
             <?php if (count($specialties) > 0): ?>
             <div class="row">

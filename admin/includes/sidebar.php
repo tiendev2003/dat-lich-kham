@@ -1,10 +1,16 @@
+<?php
+// Include core functions if not already included
+if (!function_exists('get_setting')) {
+    require_once __DIR__ . '/../../includes/functions.php';
+}
+?>
 <div class="sidebar">
     <div class="sidebar-content d-flex flex-column p-3 text-white">
         <!-- Logo/Brand -->
         <a href="tongquan.php"
             class="d-flex align-items-center mb-3 mb-md-0 me-md-auto text-white text-decoration-none">
             <i class="fas fa-hospital me-2"></i>
-            <span class="fs-4">Lộc Bình Clinic</span>
+            <span class="fs-4"><?php echo get_setting('site_name', 'Lộc Bình Clinic'); ?></span>
         </a>
         <hr>
 
@@ -67,11 +73,10 @@
             <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
                 id="dropdownUser1" data-bs-toggle="dropdown" aria-expanded="false">
                 <img src="https://github.com/mdo.png" alt="" width="32" height="32" class="rounded-circle me-2">
-                <strong>Admin</strong>
+                <strong><?php echo get_logged_in_user()['ho_ten'] ?? 'Admin'; ?></strong>
             </a>
             <ul class="dropdown-menu dropdown-menu-dark text-small shadow" aria-labelledby="dropdownUser1">
-                <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-                <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+                 <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
                 <li>
                     <hr class="dropdown-divider">
                 </li>
@@ -87,7 +92,7 @@
     <button class="mobile-toggle" id="sidebarToggle">
         <i class="fas fa-bars"></i>
     </button>
-    <span class="brand-text">Lộc Bình Clinic</span>
+    <span class="brand-text"><?php echo get_setting('site_name', 'Lộc Bình Clinic'); ?></span>
     <div class="dropdown">
         <a href="#" class="d-flex align-items-center text-white text-decoration-none dropdown-toggle"
             id="mobileUserDropdown" data-bs-toggle="dropdown" aria-expanded="false">
@@ -95,8 +100,7 @@
         </a>
         <ul class="dropdown-menu dropdown-menu-dark text-small shadow dropdown-menu-end"
             aria-labelledby="mobileUserDropdown">
-            <li><a class="dropdown-item" href="profile.php"><i class="fas fa-user me-2"></i>Hồ sơ</a></li>
-            <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
+             <li><a class="dropdown-item" href="caidat.php"><i class="fas fa-cog me-2"></i>Cài đặt</a></li>
             <li>
                 <hr class="dropdown-divider">
             </li>
@@ -135,7 +139,7 @@
     }
 
     .nav-link.active {
-        background-color: #0d6efd !important;
+        background-color: <?php echo get_setting('primary_color', '#0d6efd'); ?> !important;
     }
 
     .dropdown-item {

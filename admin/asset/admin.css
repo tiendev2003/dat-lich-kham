@@ -4,9 +4,7 @@ body {
   background-color: #f8f9fa;
   overflow-x: hidden;
 }
-.content-wrapper {
-  margin-top: 200px;
-}
+ 
 /* Sidebar Styles */
 .sidebar {
   background-color: #343a40;

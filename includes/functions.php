@@ -23,25 +23,86 @@ function get_setting($key, $default = '') {
                 // Kiểm tra xem có cần làm mới dữ liệu không
                 if (file_exists(__DIR__ . '/settings_cache.php')) {
                     include_once __DIR__ . '/settings_cache.php';
+                    
+                    // Nếu cache đã hết hạn hoặc cần làm mới
+                    if (isset($settings_needs_refresh) && $settings_needs_refresh) {
+                        // Lấy dữ liệu mới từ database
+                        $settings = refresh_settings_from_database();
+                    }
                 }
             }
         }
         
         // Nếu không có file hoặc cần làm mới, lấy từ database
         if ($settings === null) {
-            global $conn;
-            $settings = [];
-            $result = $conn->query("SELECT ten_key, ten_value FROM caidat_website");
-            if ($result && $result->num_rows > 0) {
-                while ($row = $result->fetch_assoc()) {
-                    $settings[$row['ten_key']] = $row['ten_value'];
-                }
-            }
+            $settings = refresh_settings_from_database();
         }
     }
     
     // Trả về giá trị cài đặt hoặc giá trị mặc định
     return isset($settings[$key]) ? $settings[$key] : $default;
+}
+
+/**
+ * Làm mới cài đặt từ cơ sở dữ liệu và cập nhật file cache
+ *
+ * @return array Mảng cài đặt từ database
+ */
+function refresh_settings_from_database() {
+    global $conn;
+    $settings = [];
+    $result = $conn->query("SELECT ten_key, ten_value FROM caidat_website");
+    if ($result && $result->num_rows > 0) {
+        while ($row = $result->fetch_assoc()) {
+            $settings[$row['ten_key']] = $row['ten_value'];
+        }
+    }
+    
+    // Cập nhật file settings_data.php
+    update_settings_data_file($settings);
+    
+    // Cập nhật thông tin cache
+    update_settings_cache_file();
+    
+    return $settings;
+}
+
+/**
+ * Cập nhật file settings_data.php với dữ liệu mới
+ *
+ * @param array $settings Dữ liệu cài đặt
+ * @return bool Thành công hay thất bại
+ */
+function update_settings_data_file($settings) {
+    $file_path = __DIR__ . '/settings_data.php';
+    $content = "<?php\n// File được sinh tự động từ phần cài đặt hệ thống\n";
+    $content .= "// Cập nhật lần cuối: " . date('Y-m-d H:i:s') . "\n\n";
+    $content .= "\$settings_data = " . var_export($settings, true) . ";\n?>";
+    
+    return file_put_contents($file_path, $content) !== false;
+}
+
+/**
+ * Cập nhật file settings_cache.php với timestamp hiện tại
+ *
+ * @return bool Thành công hay thất bại
+ */
+function update_settings_cache_file() {
+    $file_path = __DIR__ . '/settings_cache.php';
+    $current_time = time();
+    
+    $content = "<?php\n// Thông tin cache cài đặt hệ thống\n";
+    $content .= "// File này được sử dụng để kiểm tra xem settings_data.php có cần được cập nhật không\n\n";
+    $content .= "// Thời gian cập nhật cuối cùng (UNIX timestamp)\n";
+    $content .= "\$settings_last_updated = $current_time; // Tương đương với " . date('Y-m-d H:i:s', $current_time) . "\n\n";
+    $content .= "// Thời gian cache hết hạn (tính bằng giây)\n";
+    $content .= "\$settings_cache_expiry = 3600; // 1 giờ\n\n";
+    $content .= "// Kiểm tra xem cache còn hạn hay không\n";
+    $content .= "\$settings_cache_valid = (time() - \$settings_last_updated) < \$settings_cache_expiry;\n\n";
+    $content .= "// Đánh dấu cần làm mới nếu cache không còn hạn\n";
+    $content .= "\$settings_needs_refresh = !\$settings_cache_valid;\n?>";
+    
+    return file_put_contents($file_path, $content) !== false;
 }
 
 /**

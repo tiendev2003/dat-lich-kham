@@ -19,59 +19,22 @@ $error_message = isset($_SESSION['error_message']) ? $_SESSION['error_message'] 
 unset($_SESSION['success_message']);
 unset($_SESSION['error_message']);
 
+// Thiết lập tiêu đề trang
+$GLOBALS['page_title'] = 'Đổi mật khẩu';
 ?>
-
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Đổi mật khẩu - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
+    <!-- Inline styles for password toggle and requirements -->
     <style>
-        .password-toggle {
-            position: absolute;
-            right: 10px;
-            top: 50%;
-            transform: translateY(-50%);
-            cursor: pointer;
-            z-index: 10;
-            color: #6c757d;
-        }
-
-        .form-floating {
-            position: relative;
-        }
-
-        .password-requirements {
-            font-size: 13px;
-            color: #6c757d;
-            margin-top: 10px;
-        }
-
-        .requirement-item {
-            display: flex;
-            align-items: center;
-            margin-bottom: 5px;
-        }
-
-        .requirement-item i {
-            margin-right: 5px;
-            font-size: 12px;
-        }
-
-        .requirement-met {
-            color: #198754;
-        }
-
-        .requirement-not-met {
-            color: #6c757d;
-        }
+        .password-toggle { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); cursor: pointer; z-index: 10; color: #6c757d; }
+        .form-floating { position: relative; }
+        .password-requirements { font-size: 13px; color: #6c757d; margin-top: 10px; }
+        .requirement-item { display: flex; align-items: center; margin-bottom: 5px; }
+        .requirement-item i { margin-right: 5px; font-size: 12px; }
+        .requirement-met { color: #198754; }
+        .requirement-not-met { color: #6c757d; }
     </style>
 </head>
 

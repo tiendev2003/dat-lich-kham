@@ -7,6 +7,7 @@ session_start();
 $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy ID dịch vụ từ tham số URL
 $service_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -122,6 +123,11 @@ if(!empty($working_hours)) {
         $working_days = 'Thứ 2 - Thứ 7';
     }
 }
+
+// Create subtitle for banner
+$banner_subtitle = !empty($service['mota_ngan']) 
+    ? $service['mota_ngan'] 
+    : 'Dịch vụ chăm sóc sức khỏe chuyên nghiệp tại ' . get_setting('site_name', 'Phòng Khám Lộc Bình');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -135,6 +141,7 @@ if(!empty($working_hours)) {
             border-radius: 10px;
             box-shadow: 0 0 20px rgba(0,0,0,0.05);
             padding: 30px;
+            margin-bottom: 40px;
         }
         .service-header h1 {
             color: var(--primary-color);
@@ -312,6 +319,13 @@ if(!empty($working_hours)) {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner -->
+    <?php display_page_banner(
+        $service['ten_dichvu'],
+        $banner_subtitle,
+        !empty($service['hinh_anh']) ? $service['hinh_anh'] : ''
+    ); ?>
+
     <!-- Breadcrumb -->
     <div class="container mt-4">
         <nav aria-label="breadcrumb">
@@ -331,30 +345,30 @@ if(!empty($working_hours)) {
     </div>
 
     <!-- Service Detail Content -->
-    <div class="container my-4">
+    <div class="container">
         <div class="service-detail-container">
             <!-- Service Header -->
             <div class="service-header">
                 <div class="row align-items-center">
                     <div class="col-md-8">
-                        <h1><?= $service['ten_dichvu'] ?></h1>
-                        <p class="lead"><?= $service['mota_ngan'] ?></p>
+                        <!-- Removed duplicate title since it's now in the banner -->
                         <?php if (!empty($service['ten_chuyenkhoa'])): ?>
                         <div class="service-category">
                             <span class="badge bg-primary"><i class="fas fa-tag me-1"></i> <?= $service['ten_chuyenkhoa'] ?></span>
                         </div>
                         <?php endif; ?>
                     </div>
+                    <!-- Hide image here if using as banner background -->
+                    <?php if (!empty($service['hinh_anh']) && false): // Disabled because we're using it in the banner ?>
                     <div class="col-md-4 text-center">
-                        <?php if (!empty($service['hinh_anh'])): ?>
                         <img src="<?= $service['hinh_anh'] ?>" alt="<?= $service['ten_dichvu'] ?>" class="img-fluid rounded service-image">
-                        <?php endif; ?>
                     </div>
+                    <?php endif; ?>
                 </div>
             </div>
 
             <!-- Service Description -->
-            <div class="service-description mt-5">
+            <div class="service-description mt-3">
                 <div class="row">
                     <div class="col-md-8">
                         <h2>Giới thiệu dịch vụ</h2>

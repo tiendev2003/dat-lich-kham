@@ -5,8 +5,8 @@
  */
 
 // Phiên bản cài đặt hiện tại
-$settings_version = 1745501716;
+$settings_version = 1745549265;
 
 // Thời gian cập nhật cuối cùng
-$settings_last_updated = '2025-04-24 15:35:16';
+$settings_last_updated = '2025-04-25 04:47:45';
 ?>

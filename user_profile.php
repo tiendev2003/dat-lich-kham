@@ -28,37 +28,20 @@ if (isset($_SESSION['profile_message'])) {
     $profile_message = $_SESSION['profile_message'];
     unset($_SESSION['profile_message']);
 }
+
+// Thiết lập tiêu đề trang
+$GLOBALS['page_title'] = 'Thông tin cá nhân';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
 
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Thông tin cá nhân - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
+    <!-- Inline profile page styles -->
     <style>
-        .profile-container {
-            padding: 40px 0;
-        }
-
-        .profile-card {
-            border-radius: 10px;
-            box-shadow: 0 0 20px rgba(0, 0, 0, 0.1);
-            overflow: hidden;
-        }
-
-        .profile-header {
-            background-color: #f8f9fa;
-            padding: 30px;
-            text-align: center;
-            border-bottom: 1px solid #eee;
-        }
-
+        .profile-container { padding: 40px 0; }
+        .profile-card { border-radius: 10px; box-shadow: 0 0 20px rgba(0, 0, 0, 0.1); overflow: hidden; }
+        .profile-header { background-color: #f8f9fa; padding: 30px; text-align: center; border-bottom: 1px solid #eee; }
         .profile-avatar {
             width: 120px;
             height: 120px;
@@ -227,7 +210,6 @@ if (isset($_SESSION['profile_message'])) {
         }
     </style>
 </head>
-
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>

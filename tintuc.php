@@ -2,6 +2,7 @@
 // Kết nối database
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Tin tức y tế';
@@ -66,65 +67,78 @@ if ($categories_result->num_rows > 0) {
 <head>
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/tintuc.css">
+    <style>
+        .filters-container {
+            margin-top: 30px;
+            margin-bottom: 30px;
+            background: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
+    
+    <!-- Banner -->
+    <?php display_page_banner('Tin tức y tế', 'Cập nhật những thông tin y tế mới nhất và hữu ích'); ?>
 
     <!-- News Section -->
     <section class="news">
         <div class="container">
-            <h1 class="page-title">Tin tức y tế</h1>
-
             <!-- Filters -->
-            <form method="GET" class="mb-4">
-                <div class="row">
-                    <div class="col-md-4 mb-3">
-                        <select name="category" class="form-select">
-                            <option value="">-- Tất cả danh mục --</option>
-                            <?php foreach ($categories as $cat): ?>
-                                <option value="<?= $cat['danh_muc'] ?>" <?= ($category == $cat['danh_muc']) ? 'selected' : '' ?>>
-                                    <?= ucfirst($cat['danh_muc']) ?> (<?= $cat['count'] ?>)
-                                </option>
-                            <?php endforeach; ?>
-                        </select>
-                    </div>
-                    <div class="col-md-6 mb-3">
-                        <div class="input-group">
-                            <input type="text" name="search" class="form-control" placeholder="Tìm kiếm tin tức..." value="<?= htmlspecialchars($search) ?>">
-                            <button type="submit" class="btn btn-primary">
-                                <i class="fas fa-search"></i> Tìm kiếm
-                            </button>
+            <div class="filters-container">
+                <form method="GET" class="mb-4">
+                    <div class="row">
+                        <div class="col-md-4 mb-3">
+                            <select name="category" class="form-select">
+                                <option value="">-- Tất cả danh mục --</option>
+                                <?php foreach ($categories as $cat): ?>
+                                    <option value="<?= $cat['danh_muc'] ?>" <?= ($category == $cat['danh_muc']) ? 'selected' : '' ?>>
+                                        <?= ucfirst($cat['danh_muc']) ?> (<?= $cat['count'] ?>)
+                                    </option>
+                                <?php endforeach; ?>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <div class="input-group">
+                                <input type="text" name="search" class="form-control" placeholder="Tìm kiếm tin tức..." value="<?= htmlspecialchars($search) ?>">
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="fas fa-search"></i> Tìm kiếm
+                                </button>
+                            </div>
+                        </div>
+                        <div class="col-md-2 mb-3">
+                            <?php if (!empty($category) || !empty($search) || !empty($tag)): ?>
+                                <a href="tintuc.php" class="btn btn-outline-secondary w-100">
+                                    <i class="fas fa-times"></i> Xóa bộ lọc
+                                </a>
+                            <?php endif; ?>
                         </div>
                     </div>
-                    <div class="col-md-2 mb-3">
-                        <?php if (!empty($category) || !empty($search) || !empty($tag)): ?>
-                            <a href="tintuc.php" class="btn btn-outline-secondary w-100">
-                                <i class="fas fa-times"></i> Xóa bộ lọc
-                            </a>
-                        <?php endif; ?>
+                    
+                    <?php if (!empty($tag)): ?>
+                    <div class="mt-2 mb-3">
+                        <div class="d-flex align-items-center">
+                            <span class="me-2">Đang lọc theo thẻ:</span>
+                            <span class="badge bg-secondary p-2"><?= htmlspecialchars($tag) ?> 
+                                <a href="tintuc.php<?= !empty($category) ? '?category=' . urlencode($category) : '' ?><?= !empty($search) ? (!empty($category) ? '&' : '?') . 'search=' . urlencode($search) : '' ?>" class="text-white ms-2">
+                                    <i class="fas fa-times"></i>
+                                </a>
+                            </span>
+                        </div>
                     </div>
-                </div>
-                
-                <?php if (!empty($tag)): ?>
-                <div class="mt-2 mb-3">
-                    <div class="d-flex align-items-center">
-                        <span class="me-2">Đang lọc theo thẻ:</span>
-                        <span class="badge bg-secondary p-2"><?= htmlspecialchars($tag) ?> 
-                            <a href="tintuc.php<?= !empty($category) ? '?category=' . urlencode($category) : '' ?><?= !empty($search) ? (!empty($category) ? '&' : '?') . 'search=' . urlencode($search) : '' ?>" class="text-white ms-2">
-                                <i class="fas fa-times"></i>
-                            </a>
-                        </span>
-                    </div>
+                    <?php endif; ?>
+                </form>
+
+                <?php if (count($paginated_news) == 0 && (!empty($search) || !empty($category) || !empty($tag))): ?>
+                <div class="alert alert-info mb-4">
+                    <p>Không tìm thấy tin tức phù hợp với bộ lọc. <a href="tintuc.php">Xem tất cả tin tức</a></p>
                 </div>
                 <?php endif; ?>
-            </form>
-
-            <?php if (count($paginated_news) == 0 && (!empty($search) || !empty($category) || !empty($tag))): ?>
-            <div class="alert alert-info mb-4">
-                <p>Không tìm thấy tin tức phù hợp với bộ lọc. <a href="tintuc.php">Xem tất cả tin tức</a></p>
             </div>
-            <?php endif; ?>
 
             <div class="row">
                 <?php if (count($paginated_news) > 0): ?>

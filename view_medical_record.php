@@ -74,257 +74,297 @@ foreach ($medications as $med) {
 }
 
 $page_title = "Chi tiết hồ sơ y tế";
-require_once 'includes/header.php';
 ?>
+<!DOCTYPE html>
+<html lang="vi">
 
-<link rel="stylesheet" href="assets/css/pages/view_medical_record.css">
+<head>
+    <?php include 'includes/head.php'; ?>
+    <link rel="stylesheet" href="assets/css/pages/view_medical_record.css">
+</head>
 
-<div class="container py-5">
-    <div class="row">
-        <div class="col-lg-3">
-            <?php include 'includes/user_sidebar.php'; ?>
-        </div>
-        <div class="col-lg-9">
-            <div class="card shadow-sm mb-4">
-                <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
-                    <h4 class="mb-0">Chi tiết hồ sơ y tế</h4>
-                    <div>
-                        <a href="medical_records.php" class="btn btn-outline-light btn-sm">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại
-                        </a>
-                        <a href="download_medical_record.php?id=<?php echo $record_id; ?>" class="btn btn-light btn-sm ms-2">
-                            <i class="fas fa-download me-1"></i> Tải xuống
-                        </a>
+<body>
+<?php include 'includes/header.php'; ?>
+
+    <div class="container py-5">
+        <div class="row">
+            <div class="col-lg-3">
+                <?php include 'includes/user_sidebar.php'; ?>
+            </div>
+            <div class="col-lg-9">
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0">Chi tiết hồ sơ y tế</h4>
+                        <div>
+                            <a href="medical_records.php" class="btn btn-outline-light btn-sm">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại
+                            </a>
+                            <a href="download_medical_record.php?id=<?php echo $record_id; ?>"
+                                class="btn btn-light btn-sm ms-2">
+                                <i class="fas fa-download me-1"></i> Tải xuống
+                            </a>
+                        </div>
                     </div>
-                </div>
-                <div class="card-body">
-                    <div class="medical-record-header mb-4 p-3 bg-light rounded">
-                        <div class="row g-3">
-                            <div class="col-md-5">
-                                <div class="d-flex align-items-center">
-                                    <div class="me-3">
-                                        <span class="badge rounded-pill <?php echo get_status_badge($record['trang_thai']); ?> p-2 fw-bold">
-                                            <?php echo get_status_name($record['trang_thai']); ?>
-                                        </span>
+                    <div class="card-body">
+                        <div class="medical-record-header mb-4 p-3 bg-light rounded">
+                            <div class="row g-3">
+                                <div class="col-md-5">
+                                    <div class="d-flex align-items-center">
+                                        <div class="me-3">
+                                            <span
+                                                class="badge rounded-pill <?php echo get_status_badge($record['trang_thai']); ?> p-2 fw-bold">
+                                                <?php echo get_status_name($record['trang_thai']); ?>
+                                            </span>
+                                        </div>
+                                        <div>
+                                            <h5 class="mb-1">Mã lịch hẹn:
+                                                <?php echo htmlspecialchars($record['ma_lichhen']); ?>
+                                            </h5>
+                                            <p class="mb-0 text-muted">
+                                                <i class="far fa-calendar-alt me-1"></i>
+                                                <?php echo date('d/m/Y', strtotime($record['ngay_hen'])); ?> |
+                                                <i class="far fa-clock me-1"></i>
+                                                <?php echo date('H:i', strtotime($record['gio_hen'])); ?>
+                                            </p>
+                                        </div>
                                     </div>
-                                    <div>
-                                        <h5 class="mb-1">Mã lịch hẹn: <?php echo htmlspecialchars($record['ma_lichhen']); ?></h5>
-                                        <p class="mb-0 text-muted">
-                                            <i class="far fa-calendar-alt me-1"></i> 
-                                            <?php echo date('d/m/Y', strtotime($record['ngay_hen'])); ?> | 
-                                            <i class="far fa-clock me-1"></i>
-                                            <?php echo date('H:i', strtotime($record['gio_hen'])); ?>
+                                </div>
+                                <div class="col-md-7 text-md-end">
+                                    <p class="mb-1">
+                                        <strong>Bác sĩ:</strong> <?php echo htmlspecialchars($record['doctor_name']); ?>
+                                        <span
+                                            class="text-primary">(<?php echo htmlspecialchars($record['specialty_name']); ?>)</span>
+                                    </p>
+                                    <?php if (!empty($record['service_name'])): ?>
+                                        <p class="mb-0">
+                                            <strong>Dịch vụ:</strong>
+                                            <?php echo htmlspecialchars($record['service_name']); ?>
+                                        </p>
+                                    <?php endif; ?>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="row mb-4">
+                            <div class="col-lg-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="card-title mb-0">Thông tin bệnh nhân</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <table class="table table-sm">
+                                            <tr>
+                                                <th width="35%">Họ và tên:</th>
+                                                <td><?php echo htmlspecialchars($record['patient_name']); ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Năm sinh:</th>
+                                                <td><?php echo htmlspecialchars($record['nam_sinh']); ?>
+                                                    (<?php echo date('Y') - $record['nam_sinh']; ?> tuổi)</td>
+                                            </tr>
+                                            <tr>
+                                                <th>Giới tính:</th>
+                                                <td><?php echo htmlspecialchars($record['gioi_tinh']); ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th>CMND/CCCD:</th>
+                                                <td><?php echo htmlspecialchars($record['cmnd_cccd'] ?: 'Chưa cập nhật'); ?>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <th>Số điện thoại:</th>
+                                                <td><?php echo htmlspecialchars($record['dien_thoai']); ?></td>
+                                            </tr>
+                                            <tr>
+                                                <th>Email:</th>
+                                                <td><?php echo htmlspecialchars($record['email'] ?: 'Chưa cập nhật'); ?>
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-lg-6">
+                                <div class="card h-100">
+                                    <div class="card-header bg-light">
+                                        <h5 class="card-title mb-0">Thông tin khám bệnh</h5>
+                                    </div>
+                                    <div class="card-body">
+                                        <?php if (!empty($record['ly_do'])): ?>
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">Lý do khám:</h6>
+                                                <p><?php echo nl2br(htmlspecialchars($record['ly_do'])); ?></p>
+                                            </div>
+                                        <?php endif; ?>
+
+                                        <div class="mb-3">
+                                            <h6 class="fw-bold">Chẩn đoán:</h6>
+                                            <p><?php echo nl2br(htmlspecialchars($record['chan_doan'])); ?></p>
+                                        </div>
+
+                                        <?php if (!empty($record['mo_ta'])): ?>
+                                            <div class="mb-3">
+                                                <h6 class="fw-bold">Mô tả chi tiết:</h6>
+                                                <p><?php echo nl2br(htmlspecialchars($record['mo_ta'])); ?></p>
+                                            </div>
+                                        <?php endif; ?>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <?php if (count($medications) > 0): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">Đơn thuốc</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="table-responsive">
+                                        <table class="table table-bordered table-striped">
+                                            <thead class="table-primary">
+                                                <tr>
+                                                    <th>STT</th>
+                                                    <th>Tên thuốc</th>
+                                                    <th>Liều dùng</th>
+                                                    <th>Số lượng</th>
+                                                    <th>Cách dùng</th>
+                                                    <th class="text-end">Đơn giá</th>
+                                                    <th class="text-end">Thành tiền</th>
+                                                </tr>
+                                            </thead>
+                                            <tbody>
+                                                <?php
+                                                $stt = 1;
+                                                foreach ($medications as $med):
+                                                    $thanh_tien = $med['gia'] * $med['so_luong'];
+                                                    ?>
+                                                    <tr>
+                                                        <td><?php echo $stt++; ?></td>
+                                                        <td>
+                                                            <strong><?php echo htmlspecialchars($med['ten_thuoc']); ?></strong>
+                                                            <small
+                                                                class="d-block text-muted"><?php echo htmlspecialchars($med['don_vi']); ?></small>
+                                                        </td>
+                                                        <td><?php echo htmlspecialchars($med['lieu_dung']); ?></td>
+                                                        <td class="text-center">
+                                                            <?php echo htmlspecialchars($med['so_luong']); ?>
+                                                        </td>
+                                                        <td><?php echo nl2br(htmlspecialchars($med['cach_dung'])); ?></td>
+                                                        <td class="text-end">
+                                                            <?php echo number_format($med['gia'], 0, ',', '.'); ?>
+                                                            đ
+                                                        </td>
+                                                        <td class="text-end">
+                                                            <?php echo number_format($thanh_tien, 0, ',', '.'); ?>
+                                                            đ
+                                                        </td>
+                                                    </tr>
+                                                    <?php if (!empty($med['huong_dan_chung'])): ?>
+                                                        <tr>
+                                                            <td colspan="7" class="bg-light">
+                                                                <small class="text-muted">
+                                                                    <i class="fas fa-info-circle me-1"></i>
+                                                                    <?php echo htmlspecialchars($med['huong_dan_chung']); ?>
+                                                                </small>
+                                                            </td>
+                                                        </tr>
+                                                    <?php endif; ?>
+                                                <?php endforeach; ?>
+                                                <tr class="table-secondary">
+                                                    <td colspan="5"></td>
+                                                    <td class="text-end fw-bold">Tổng tiền thuốc:</td>
+                                                    <td class="text-end fw-bold">
+                                                        <?php echo number_format($medication_cost, 0, ',', '.'); ?> đ
+                                                    </td>
+                                                </tr>
+                                            </tbody>
+                                        </table>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <?php if (!empty($record['ghi_chu'])): ?>
+                            <div class="card mb-4">
+                                <div class="card-header bg-light">
+                                    <h5 class="card-title mb-0">Ghi chú / Lời dặn</h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="p-3 bg-light-subtle border rounded">
+                                        <?php echo nl2br(htmlspecialchars($record['ghi_chu'])); ?>
+                                    </div>
+                                </div>
+                            </div>
+                        <?php endif; ?>
+
+                        <div class="card">
+                            <div class="card-header bg-light">
+                                <h5 class="card-title mb-0">Thông tin phí</h5>
+                            </div>
+                            <div class="card-body">
+                                <div class="row">
+                                    <div class="col-md-6">
+                                        <table class="table">
+                                            <tr>
+                                                <th>Phí khám:</th>
+                                                <td class="text-end">
+                                                    <?php echo number_format($record['phi_kham'], 0, ',', '.'); ?> đ
+                                                </td>
+                                            </tr>
+                                            <?php if (count($medications) > 0): ?>
+                                                <tr>
+                                                    <th>Tiền thuốc:</th>
+                                                    <td class="text-end">
+                                                        <?php echo number_format($medication_cost, 0, ',', '.'); ?> đ
+                                                    </td>
+                                                </tr>
+                                            <?php endif; ?>
+                                            <tr class="fw-bold">
+                                                <th>Tổng chi phí:</th>
+                                                <td class="text-end">
+                                                    <?php echo number_format($record['phi_kham'] + $medication_cost, 0, ',', '.'); ?>
+                                                    đ
+                                                </td>
+                                            </tr>
+                                        </table>
+                                    </div>
+                                    <div class="col-md-6">
+                                        <p class="text-muted mb-1">
+                                            <i class="far fa-calendar-check me-1"></i>
+                                            <strong>Ngày khám:</strong>
+                                            <?php echo date('d/m/Y', strtotime($record['ngay_hen'])); ?>
+                                        </p>
+                                        <p class="text-muted">
+                                            <i class="far fa-calendar-plus me-1"></i>
+                                            <strong>Ngày tạo hồ sơ:</strong>
+                                            <?php echo date('d/m/Y H:i', strtotime($record['ngay_tao'])); ?>
                                         </p>
                                     </div>
                                 </div>
                             </div>
-                            <div class="col-md-7 text-md-end">
-                                <p class="mb-1">
-                                    <strong>Bác sĩ:</strong> <?php echo htmlspecialchars($record['doctor_name']); ?> 
-                                    <span class="text-primary">(<?php echo htmlspecialchars($record['specialty_name']); ?>)</span>
-                                </p>
-                                <?php if (!empty($record['service_name'])): ?>
-                                    <p class="mb-0">
-                                        <strong>Dịch vụ:</strong> <?php echo htmlspecialchars($record['service_name']); ?>
-                                    </p>
-                                <?php endif; ?>
-                            </div>
                         </div>
                     </div>
-
-                    <div class="row mb-4">
-                        <div class="col-lg-6">
-                            <div class="card h-100">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Thông tin bệnh nhân</h5>
-                                </div>
-                                <div class="card-body">
-                                    <table class="table table-sm">
-                                        <tr>
-                                            <th width="35%">Họ và tên:</th>
-                                            <td><?php echo htmlspecialchars($record['patient_name']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Năm sinh:</th>
-                                            <td><?php echo htmlspecialchars($record['nam_sinh']); ?> (<?php echo date('Y') - $record['nam_sinh']; ?> tuổi)</td>
-                                        </tr>
-                                        <tr>
-                                            <th>Giới tính:</th>
-                                            <td><?php echo htmlspecialchars($record['gioi_tinh']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>CMND/CCCD:</th>
-                                            <td><?php echo htmlspecialchars($record['cmnd_cccd'] ?: 'Chưa cập nhật'); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Số điện thoại:</th>
-                                            <td><?php echo htmlspecialchars($record['dien_thoai']); ?></td>
-                                        </tr>
-                                        <tr>
-                                            <th>Email:</th>
-                                            <td><?php echo htmlspecialchars($record['email'] ?: 'Chưa cập nhật'); ?></td>
-                                        </tr>
-                                    </table>
-                                </div>
-                            </div>
+                    <div class="card-footer">
+                        <div class="d-flex justify-content-between">
+                            <a href="medical_records.php" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
+                            </a>
+                            <a href="download_medical_record.php?id=<?php echo $record_id; ?>" class="btn btn-primary">
+                                <i class="fas fa-download me-1"></i> Tải xuống hồ sơ
+                            </a>
                         </div>
-                        <div class="col-lg-6">
-                            <div class="card h-100">
-                                <div class="card-header bg-light">
-                                    <h5 class="card-title mb-0">Thông tin khám bệnh</h5>
-                                </div>
-                                <div class="card-body">
-                                    <?php if (!empty($record['ly_do'])): ?>
-                                    <div class="mb-3">
-                                        <h6 class="fw-bold">Lý do khám:</h6>
-                                        <p><?php echo nl2br(htmlspecialchars($record['ly_do'])); ?></p>
-                                    </div>
-                                    <?php endif; ?>
-                                    
-                                    <div class="mb-3">
-                                        <h6 class="fw-bold">Chẩn đoán:</h6>
-                                        <p><?php echo nl2br(htmlspecialchars($record['chan_doan'])); ?></p>
-                                    </div>
-                                    
-                                    <?php if (!empty($record['mo_ta'])): ?>
-                                    <div class="mb-3">
-                                        <h6 class="fw-bold">Mô tả chi tiết:</h6>
-                                        <p><?php echo nl2br(htmlspecialchars($record['mo_ta'])); ?></p>
-                                    </div>
-                                    <?php endif; ?>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <?php if (count($medications) > 0): ?>
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="card-title mb-0">Đơn thuốc</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead class="table-primary">
-                                        <tr>
-                                            <th>STT</th>
-                                            <th>Tên thuốc</th>
-                                            <th>Liều dùng</th>
-                                            <th>Số lượng</th>
-                                            <th>Cách dùng</th>
-                                            <th class="text-end">Đơn giá</th>
-                                            <th class="text-end">Thành tiền</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        <?php 
-                                        $stt = 1;
-                                        foreach ($medications as $med): 
-                                            $thanh_tien = $med['gia'] * $med['so_luong'];
-                                        ?>
-                                            <tr>
-                                                <td><?php echo $stt++; ?></td>
-                                                <td>
-                                                    <strong><?php echo htmlspecialchars($med['ten_thuoc']); ?></strong>
-                                                    <small class="d-block text-muted"><?php echo htmlspecialchars($med['don_vi']); ?></small>
-                                                </td>
-                                                <td><?php echo htmlspecialchars($med['lieu_dung']); ?></td>
-                                                <td class="text-center"><?php echo htmlspecialchars($med['so_luong']); ?></td>
-                                                <td><?php echo nl2br(htmlspecialchars($med['cach_dung'])); ?></td>
-                                                <td class="text-end"><?php echo number_format($med['gia'], 0, ',', '.'); ?> đ</td>
-                                                <td class="text-end"><?php echo number_format($thanh_tien, 0, ',', '.'); ?> đ</td>
-                                            </tr>
-                                            <?php if (!empty($med['huong_dan_chung'])): ?>
-                                            <tr>
-                                                <td colspan="7" class="bg-light">
-                                                    <small class="text-muted">
-                                                        <i class="fas fa-info-circle me-1"></i> 
-                                                        <?php echo htmlspecialchars($med['huong_dan_chung']); ?>
-                                                    </small>
-                                                </td>
-                                            </tr>
-                                            <?php endif; ?>
-                                        <?php endforeach; ?>
-                                        <tr class="table-secondary">
-                                            <td colspan="5"></td>
-                                            <td class="text-end fw-bold">Tổng tiền thuốc:</td>
-                                            <td class="text-end fw-bold"><?php echo number_format($medication_cost, 0, ',', '.'); ?> đ</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <?php if (!empty($record['ghi_chu'])): ?>
-                    <div class="card mb-4">
-                        <div class="card-header bg-light">
-                            <h5 class="card-title mb-0">Ghi chú / Lời dặn</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="p-3 bg-light-subtle border rounded">
-                                <?php echo nl2br(htmlspecialchars($record['ghi_chu'])); ?>
-                            </div>
-                        </div>
-                    </div>
-                    <?php endif; ?>
-
-                    <div class="card">
-                        <div class="card-header bg-light">
-                            <h5 class="card-title mb-0">Thông tin phí</h5>
-                        </div>
-                        <div class="card-body">
-                            <div class="row">
-                                <div class="col-md-6">
-                                    <table class="table">
-                                        <tr>
-                                            <th>Phí khám:</th>
-                                            <td class="text-end"><?php echo number_format($record['phi_kham'], 0, ',', '.'); ?> đ</td>
-                                        </tr>
-                                        <?php if (count($medications) > 0): ?>
-                                        <tr>
-                                            <th>Tiền thuốc:</th>
-                                            <td class="text-end"><?php echo number_format($medication_cost, 0, ',', '.'); ?> đ</td>
-                                        </tr>
-                                        <?php endif; ?>
-                                        <tr class="fw-bold">
-                                            <th>Tổng chi phí:</th>
-                                            <td class="text-end"><?php echo number_format($record['phi_kham'] + $medication_cost, 0, ',', '.'); ?> đ</td>
-                                        </tr>
-                                    </table>
-                                </div>
-                                <div class="col-md-6">
-                                    <p class="text-muted mb-1">
-                                        <i class="far fa-calendar-check me-1"></i>
-                                        <strong>Ngày khám:</strong> <?php echo date('d/m/Y', strtotime($record['ngay_hen'])); ?>
-                                    </p>
-                                    <p class="text-muted">
-                                        <i class="far fa-calendar-plus me-1"></i>
-                                        <strong>Ngày tạo hồ sơ:</strong> <?php echo date('d/m/Y H:i', strtotime($record['ngay_tao'])); ?>
-                                    </p>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-                <div class="card-footer">
-                    <div class="d-flex justify-content-between">
-                        <a href="medical_records.php" class="btn btn-outline-secondary">
-                            <i class="fas fa-arrow-left me-1"></i> Quay lại danh sách
-                        </a>
-                        <a href="download_medical_record.php?id=<?php echo $record_id; ?>" class="btn btn-primary">
-                            <i class="fas fa-download me-1"></i> Tải xuống hồ sơ
-                        </a>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</div>
+</body>
+
+
 
 <?php
-function get_status_badge($status) {
+function get_status_badge($status)
+{
     switch ($status) {
         case 'completed':
             return 'bg-success';
@@ -339,7 +379,8 @@ function get_status_badge($status) {
     }
 }
 
-function get_status_name($status) {
+function get_status_name($status)
+{
     switch ($status) {
         case 'completed':
             return 'Đã hoàn thành';

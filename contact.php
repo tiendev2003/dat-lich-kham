@@ -2,6 +2,7 @@
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Liên hệ';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy thông tin từ cài đặt
 $site_name = get_setting('site_name', 'Phòng khám Lộc Bình');
@@ -36,15 +37,6 @@ $working_hours = explode(',', $site_working_hours);
 <head>
     <?php include 'includes/head.php'; ?>
     <style>
-        .contact-header {
-            background: linear-gradient(rgba(0, 0, 0, 0.6), rgba(0, 0, 0, 0.6)), url('<?php echo $contact_image; ?>');
-            background-size: cover;
-            background-position: center;
-            color: white;
-            padding: 80px 0;
-            text-align: center;
-            margin-bottom: 50px;
-        }
         .contact-card {
             background-color: #fff;
             border-radius: 10px;
@@ -115,13 +107,8 @@ $working_hours = explode(',', $site_working_hours);
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Contact Header -->
-    <section class="contact-header">
-        <div class="container">
-            <h1>Liên hệ</h1>
-            <p class="lead">Chúng tôi luôn sẵn sàng hỗ trợ bạn - Đừng ngần ngại liên hệ với chúng tôi</p>
-        </div>
-    </section>
+    <!-- Banner -->
+    <?php display_page_banner('Liên hệ', 'Chúng tôi luôn sẵn sàng hỗ trợ bạn - Đừng ngần ngại liên hệ với chúng tôi', $contact_image); ?>
 
     <div class="container mb-5">
         <div class="row">

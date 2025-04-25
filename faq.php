@@ -2,6 +2,8 @@
 session_start();
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
+
 $isLogged = is_logged_in();
 if ($isLogged) {
     $user = get_logged_in_user();
@@ -361,7 +363,7 @@ $popular_faqs = get_dummy_popular_faqs();
 
         /* FAQ Styles */
         .faq-container {
-            padding: 50px 0;
+            padding: 0 0 50px;
             background-color: #f8f9fa;
         }
         
@@ -546,14 +548,11 @@ $popular_faqs = get_dummy_popular_faqs();
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner -->
+    <?php display_page_banner('Câu hỏi thường gặp (FAQ)', 'Tìm câu trả lời nhanh chóng cho các câu hỏi của bạn về dịch vụ khám chữa bệnh tại ' . htmlspecialchars($site_name)); ?>
+
     <div class="faq-container">
         <div class="container">
-            <div class="faq-header">
-                <h1>Câu hỏi thường gặp (FAQ)</h1>
-                <p class="lead">Tìm câu trả lời nhanh chóng cho các câu hỏi của bạn về dịch vụ khám chữa bệnh tại <?php echo htmlspecialchars($site_name); ?></p>
-            </div>
-            
-            <!-- Search form -->
             <div class="search-container">
                 <div class="search-form-wrapper">
                     <form class="search-form" method="GET" action="faq.php">

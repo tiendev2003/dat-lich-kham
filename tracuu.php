@@ -2,6 +2,7 @@
 session_start();
 require_once 'includes/db_connect.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = "Tra cứu thông tin khám bệnh";
@@ -49,16 +50,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 <head>
     <?php include 'includes/head.php'; ?>
     <style>
-        .page-banner {
-            background: linear-gradient(rgba(0, 91, 172, 0.85), rgba(0, 91, 172, 0.95)), url('assets/img/logo-hospital.jpg');
-            background-size: cover;
-            background-position: center;
-            padding: 80px 0;
-            color: white;
-            margin-bottom: 40px;
-            position: relative;
-        }
-
         .search-section {
             position: relative;
             z-index: 1;
@@ -194,13 +185,8 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Banner section -->
-    <section class="page-banner mt-4 mb-8">
-        <div class="container text-center">
-            <h1 class="display-4 fw-bold">Tra Cứu Thông Tin Khám Bệnh</h1>
-            <p class="lead">Nhập mã lịch hẹn và số điện thoại để xem thông tin khám bệnh của bạn</p>
-        </div>
-    </section>
+    <!-- Banner -->
+    <?php display_page_banner('Tra Cứu Thông Tin Khám Bệnh', 'Nhập mã lịch hẹn và số điện thoại để xem thông tin khám bệnh của bạn'); ?>
 
     <div class="container search-section">
         <div class="row justify-content-center">

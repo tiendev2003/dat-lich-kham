@@ -6,6 +6,10 @@ if (!is_logged_in()) {
     header('Location: dangnhap.php');
     exit;
 }
+
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = 'Lịch sử đặt lịch';
+
 $patient = get_patient_info($_SESSION['user_id']);
 $today = date('Y-m-d');
 // All appointments
@@ -38,14 +42,7 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 <!DOCTYPE html>
 <html lang="vi">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Lịch sử đặt lịch khám - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
     <style>
         .history-container {
             padding: 40px 0;
@@ -201,15 +198,15 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <div class="container py-5">
         <div class="row">
-        <div class="col-md-3">
+            <div class="col-md-3">
                 <?php include 'includes/user_sidebar.php'; ?>
             </div>
 
             <div class="col-md-9">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white  d-flex justify-content-between align-items-center">
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
                         <h4 class="mb-0"><i class="fas fa-history me-2"></i>Lịch sử đặt lịch khám</h4>
-                        <a href="datlich.php" class="btn btn-success  btn-sm">
+                        <a href="datlich.php" class="btn btn-success btn-sm">
                             <i class="fas fa-plus-circle me-1"></i> Đặt lịch mới
                         </a>
                     </div>
@@ -837,6 +834,7 @@ $specialties = $stmt->get_result()->fetch_all(MYSQLI_ASSOC);
 
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="assets/js/main.js"></script>
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             // Hiển thị/ẩn bộ lọc

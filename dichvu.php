@@ -2,6 +2,7 @@
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Dịch vụ y tế';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Kết nối database
 $db_already_connected = false;
@@ -70,24 +71,116 @@ function formatPrice($price) {
 <head>
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/dichvu.css">
+    <style>
+        .service-filters {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .service-card {
+            background-color: #fff;
+            border-radius: 10px;
+            padding: 25px 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            margin-bottom: 30px;
+            text-align: center;
+            height: 100%;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .service-card:hover {
+            transform: translateY(-10px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .service-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: rgba(var(--primary-color-rgb), 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 20px;
+        }
+        
+        .service-icon i {
+            font-size: 32px;
+            color: var(--primary-color);
+        }
+        
+        .service-icon img {
+            width: 50px;
+            height: 50px;
+            object-fit: contain;
+        }
+        
+        .service-card h3 {
+            font-size: 20px;
+            font-weight: 600;
+            margin-bottom: 15px;
+            color: var(--primary-color);
+        }
+        
+        .service-card p {
+            color: #6c757d;
+            margin-bottom: 20px;
+        }
+        
+        .service-features {
+            margin-top: auto;
+            text-align: left;
+            margin-bottom: 20px;
+        }
+        
+        .service-features p {
+            margin-bottom: 8px;
+            color: #495057;
+        }
+        
+        .service-features i {
+            color: var(--primary-color);
+            margin-right: 8px;
+        }
+        
+        .service-price {
+            margin-bottom: 20px;
+            font-weight: 600;
+            color: var(--primary-color);
+            font-size: 18px;
+        }
+        
+        .service-card .btn {
+            border-radius: 5px;
+        }
+        
+        .pagination-container {
+            margin-top: 40px;
+            margin-bottom: 20px;
+        }
+    </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Banner Section -->
-    <div class="service-banner" <?php if (!empty($service_banner)): ?>style="background-image: url('<?php echo $service_banner; ?>');"<?php endif; ?>>
-        <div class="container">
-            <h1 class="text-center"><?php echo htmlspecialchars($service_title); ?></h1>
-            <p class="text-center"><?php echo htmlspecialchars($service_subtitle); ?></p>
-        </div>
-    </div>
+    <!-- Banner -->
+    <?php display_page_banner(
+        htmlspecialchars($service_title),
+        htmlspecialchars($service_subtitle),
+        !empty($service_banner) ? $service_banner : ''
+    ); ?>
 
     <!-- Services Section -->
-    <div class="services-section">
+    <div class="services-section py-5">
         <div class="container">
             <!-- Filters -->
-            <div class="service-filters mb-4">
+            <div class="service-filters">
                 <form action="" method="GET" class="row g-3">
                     <div class="col-md-4">
                         <label for="specialty" class="form-label">Chuyên khoa</label>

@@ -2,6 +2,7 @@
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Đội ngũ bác sĩ';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Kết nối database
 $db_already_connected = false;
@@ -66,15 +67,62 @@ if ($doctors_result && $doctors_result->num_rows > 0) {
     <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/doctors.css">
     <style>
-        .doctor-banner {
-            background: linear-gradient(rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0.5)), 
-                        url('<?php echo !empty($doctors_banner) ? $doctors_banner : 'assets/img/doctors-banner.jpg'; ?>');
-            background-size: cover;
-            background-position: center;
-            padding: 80px 0;
-            margin-bottom: 40px;
-            color: #fff;
-            text-align: center;
+        .doctor-filters {
+            background-color: #fff;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+        }
+        
+        .doctor-card {
+            background-color: #fff;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.05);
+            margin-bottom: 30px;
+            height: 100%;
+            transition: transform 0.3s ease;
+        }
+        
+        .doctor-card:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 10px 25px rgba(0,0,0,0.1);
+        }
+        
+        .doctor-image {
+            height: 250px;
+            overflow: hidden;
+        }
+        
+        .doctor-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .doctor-info {
+            padding: 20px;
+        }
+        
+        .doctor-actions {
+            margin-top: 20px;
+            display: flex;
+            gap: 10px;
+        }
+        
+        .doctor-actions .btn {
+            flex: 1;
+        }
+        
+        .pagination .page-link {
+            color: var(--primary-color);
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: var(--primary-color);
+            border-color: var(--primary-color);
+            color: white;
         }
     </style>
 </head>
@@ -82,19 +130,18 @@ if ($doctors_result && $doctors_result->num_rows > 0) {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
-    <!-- Banner Section -->
-    <div class="doctor-banner">
-        <div class="container">
-            <h1 class="display-4"><?php echo htmlspecialchars($doctors_title); ?></h1>
-            <p class="lead"><?php echo htmlspecialchars($doctors_subtitle); ?></p>
-        </div>
-    </div>
+    <!-- Banner -->
+    <?php display_page_banner(
+        htmlspecialchars($doctors_title),
+        htmlspecialchars($doctors_subtitle),
+        !empty($doctors_banner) ? $doctors_banner : ''
+    ); ?>
 
     <!-- Doctor List Section -->
-    <section class="doctor-list">
+    <section class="doctor-list py-5">
         <div class="container">
             <!-- Filters -->
-            <div class="doctor-filters mb-4">
+            <div class="doctor-filters">
                 <form action="" method="GET" class="row g-3">
                     <div class="col-md-4">
                         <label for="specialty" class="form-label">Chuyên khoa</label>

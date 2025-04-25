@@ -2,6 +2,7 @@
 // Thiết lập tiêu đề trang cho head.php
 $GLOBALS['page_title'] = 'Giới thiệu';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy thông tin từ cài đặt
 $site_name = get_setting('site_name', 'Phòng khám Lộc Bình');
@@ -18,9 +19,11 @@ $about_content = get_setting('about_content', '');
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner -->
+    <?php display_page_banner('Giới thiệu', 'Chào mừng bạn đến với ' . htmlspecialchars($site_name)); ?>
+
     <!-- Main Content -->
     <div class="container my-5">
-        <h1 class="text-center mb-4">Giới thiệu về <?php echo htmlspecialchars($site_name); ?></h1>
         <div class="row">
             <div class="col-md-6">
                 <img src="<?php echo $about_image; ?>" alt="<?php echo htmlspecialchars($site_name); ?>" class="img-fluid rounded">

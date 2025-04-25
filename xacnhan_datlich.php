@@ -62,25 +62,22 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
 ?>
 <!DOCTYPE html>
 <html lang="vi">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Xác nhận đặt lịch - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-    <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
+
     <style>
         .confirm-container {
             padding: 40px 0;
         }
+
         .confirm-card {
             border-radius: 15px;
             box-shadow: 0 0 25px rgba(0, 0, 0, 0.1);
             overflow: hidden;
             background-color: #fff;
         }
+
         .confirm-header {
             background-color: #0d6efd;
             color: white;
@@ -88,15 +85,18 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             text-align: center;
             position: relative;
         }
+
         .confirm-header h1 {
             font-size: 24px;
             font-weight: 600;
             margin-bottom: 5px;
         }
+
         .confirm-header p {
             margin-bottom: 0;
             font-size: 16px;
         }
+
         .confirm-success-icon {
             width: 80px;
             height: 80px;
@@ -110,12 +110,15 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             margin: 0 auto 15px;
             border: 3px solid #0d6efd;
         }
+
         .confirm-content {
             padding: 30px;
         }
+
         .appointment-summary {
             margin-bottom: 30px;
         }
+
         .summary-title {
             font-size: 18px;
             font-weight: 600;
@@ -124,22 +127,27 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             padding-bottom: 10px;
             border-bottom: 1px solid #eee;
         }
+
         .summary-item {
             display: flex;
             margin-bottom: 12px;
         }
+
         .summary-label {
             min-width: 180px;
             color: #6c757d;
             font-weight: 500;
         }
+
         .summary-value {
             font-weight: 500;
             flex-grow: 1;
         }
+
         .alert-info {
             border-left: 4px solid #0dcaf0;
         }
+
         .doctor-avatar {
             width: 70px;
             height: 70px;
@@ -147,27 +155,33 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             overflow: hidden;
             margin-right: 15px;
         }
+
         .doctor-avatar img {
             width: 100%;
             height: 100%;
             object-fit: cover;
         }
+
         .doctor-info {
             display: flex;
             align-items: center;
             margin-bottom: 20px;
         }
+
         .doctor-name {
             font-weight: 600;
             margin-bottom: 3px;
         }
+
         .doctor-specialty {
             color: #6c757d;
             font-size: 14px;
         }
+
         .payment-methods {
             margin-top: 20px;
         }
+
         .payment-method {
             border: 1px solid #dee2e6;
             border-radius: 8px;
@@ -176,46 +190,56 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             cursor: pointer;
             transition: all 0.3s ease;
         }
+
         .payment-method:hover {
             border-color: #0d6efd;
         }
+
         .payment-method.active {
             border-color: #0d6efd;
             background-color: #f0f7ff;
         }
+
         .payment-method-header {
             display: flex;
             align-items: center;
         }
+
         .payment-method-radio {
             margin-right: 10px;
         }
+
         .payment-method-logo {
             margin-right: 10px;
             font-size: 24px;
             width: 40px;
             text-align: center;
         }
+
         .payment-details {
             margin-top: 15px;
             padding-top: 15px;
             border-top: 1px dashed #dee2e6;
             display: none;
         }
+
         .payment-method.active .payment-details {
             display: block;
         }
+
         .price-details {
             background-color: #f8f9fa;
             border-radius: 8px;
             padding: 20px;
             margin-top: 20px;
         }
+
         .price-row {
             display: flex;
             justify-content: space-between;
             margin-bottom: 10px;
         }
+
         .price-row.total {
             border-top: 1px solid #dee2e6;
             padding-top: 10px;
@@ -223,22 +247,26 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
             font-weight: 600;
             font-size: 18px;
         }
+
         .btn-group {
             margin-top: 30px;
             display: flex;
             gap: 10px;
         }
+
         @media (max-width: 768px) {
             .summary-item {
                 flex-direction: column;
                 margin-bottom: 20px;
             }
+
             .summary-label {
                 margin-bottom: 5px;
             }
         }
     </style>
 </head>
+
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
@@ -256,7 +284,8 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
                     </div>
                     <div class="confirm-content">
                         <div class="alert alert-info">
-                            <i class="fas fa-info-circle me-2"></i> Lịch hẹn của bạn đã được ghi nhận và đang chờ xác nhận từ bác sĩ. Chúng tôi sẽ thông báo qua email và tin nhắn khi lịch hẹn được xác nhận.
+                            <i class="fas fa-info-circle me-2"></i> Lịch hẹn của bạn đã được ghi nhận và đang chờ xác
+                            nhận từ bác sĩ. Chúng tôi sẽ thông báo qua email và tin nhắn khi lịch hẹn được xác nhận.
                         </div>
 
                         <div class="appointment-summary">
@@ -276,7 +305,7 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
                                 <div class="summary-label"><i class="far fa-calendar-alt me-2"></i>Ngày khám:</div>
                                 <div class="summary-value"><?php echo $ngay; ?></div>
                             </div>
-                            
+
                             <div class="summary-item">
                                 <div class="summary-label"><i class="far fa-clock me-2"></i>Giờ khám:</div>
                                 <div class="summary-value"><?php echo $gio; ?></div>
@@ -315,9 +344,10 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
 
                         <div class="payment-summary">
                             <h2 class="summary-title">Thông tin thanh toán</h2>
-                            
+
                             <div class="summary-item">
-                                <div class="summary-label"><i class="fas fa-money-bill-wave me-2"></i>Hình thức thanh toán:</div>
+                                <div class="summary-label"><i class="fas fa-money-bill-wave me-2"></i>Hình thức thanh
+                                    toán:</div>
                                 <div class="summary-value">Thanh toán sau tại cơ sở y tế</div>
                             </div>
 
@@ -347,7 +377,8 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
                         </div>
 
                         <div class="mt-4">
-                            <p class="text-center text-muted">Mã lịch hẹn: <span class="fw-bold"><?php echo $booking['ma_lichhen']; ?></span></p>
+                            <p class="text-center text-muted">Mã lịch hẹn: <span
+                                    class="fw-bold"><?php echo $booking['ma_lichhen']; ?></span></p>
                         </div>
                     </div>
                 </div>
@@ -376,20 +407,20 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
     <!-- Bootstrap JS and dependencies -->
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
     <script>
-        document.addEventListener('DOMContentLoaded', function() {
+        document.addEventListener('DOMContentLoaded', function () {
             // Xử lý khi người dùng chọn phương thức thanh toán
             const paymentMethods = document.querySelectorAll('.payment-method');
-            
+
             paymentMethods.forEach(method => {
-                method.addEventListener('click', function() {
+                method.addEventListener('click', function () {
                     // Remove active class from all methods
                     paymentMethods.forEach(m => {
                         m.classList.remove('active');
                     });
-                    
+
                     // Add active class to selected method
                     this.classList.add('active');
-                    
+
                     // Check the radio button
                     const radio = this.querySelector('input[type="radio"]');
                     radio.checked = true;
@@ -398,4 +429,5 @@ $gia_kham = number_format($booking['gia_coban'], 0, ',', '.') . 'đ';
         });
     </script>
 </body>
+
 </html>

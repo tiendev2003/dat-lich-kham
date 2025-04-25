@@ -8,6 +8,7 @@ $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
 require_once 'admin/crud/tintuc_crud.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy ID tin tức từ tham số URL
 $news_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -87,6 +88,13 @@ function formatDate($date) {
     if (!$date) return 'N/A';
     return date('d/m/Y', strtotime($date));
 }
+
+// Get excerpt for banner subtitle
+$subtitle = !empty($news_detail['meta_description']) 
+    ? $news_detail['meta_description'] 
+    : (strlen(strip_tags($news_detail['noi_dung'])) > 150
+        ? substr(strip_tags($news_detail['noi_dung']), 0, 150) . '...'
+        : strip_tags($news_detail['noi_dung']));
 ?>
 
 <!DOCTYPE html>
@@ -96,7 +104,7 @@ function formatDate($date) {
     <link rel="stylesheet" href="assets/css/pages/chitiet_tintuc.css">
     <style>
         .news-detail {
-            padding: 40px 0;
+            padding: 20px 0 40px;
         }
         .news-title {
             font-size: 32px;
@@ -363,11 +371,20 @@ function formatDate($date) {
                 echo "$r,$g,$b";
             ?>;
         }
+        .breadcrumb-nav {
+            margin-bottom: 20px;
+        }
     </style>
 </head>
 <body>
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
+
+    <!-- Banner -->
+    <?php 
+    $custom_bg = !empty($news_detail['hinh_anh']) ? $news_detail['hinh_anh'] : '';
+    display_page_banner($news_detail['tieu_de'], $subtitle, $custom_bg); 
+    ?>
 
     <!-- News Detail Section -->
     <div class="news-detail">
@@ -385,8 +402,6 @@ function formatDate($date) {
                 <!-- Main Content -->
                 <div class="col-lg-8">
                     <article class="news-content">
-                        <h1 class="news-title"><?= $news_detail['tieu_de'] ?></h1>
-                        
                         <div class="news-meta">
                             <span class="date"><i class="far fa-calendar-alt"></i> <?= formatDate($news_detail['ngay_dang']) ?></span>
                             <span class="category"><i class="far fa-folder"></i> <?= ucfirst($news_detail['danh_muc']) ?></span>

@@ -8,6 +8,7 @@ $db_already_connected = false;
 require_once 'admin/includes/db_connect.php';
 require_once 'admin/crud/tintuc_crud.php';
 require_once 'includes/functions.php';
+include_once 'includes/page_banner.php';
 
 // Lấy ID bác sĩ từ tham số URL
 $doctor_id = isset($_GET['id']) ? (int)$_GET['id'] : 0;
@@ -113,6 +114,9 @@ function formatDate($date) {
 function calculateAge($birth_year) {
     return date('Y') - $birth_year;
 }
+
+// Prepare subtitle for banner
+$banner_subtitle = "Bác sĩ chuyên khoa " . ($doctor['ten_chuyenkhoa'] ?? 'Đa khoa');
 ?>
 <!DOCTYPE html>
 <html lang="vi">
@@ -302,9 +306,16 @@ function calculateAge($birth_year) {
     <!-- Header -->
     <?php include 'includes/header.php'; ?>
 
+    <!-- Banner -->
+    <?php display_page_banner(
+        "Bác sĩ " . $doctor['ho_ten'],
+        $banner_subtitle,
+        !empty($doctor['hinh_anh']) ? $doctor['hinh_anh'] : ''
+    ); ?>
+
     <!-- Main Content -->
     <div class="container doctor-profile">
-        <nav aria-label="breadcrumb">
+        <nav aria-label="breadcrumb" class="mb-4">
             <ol class="breadcrumb">
                 <li class="breadcrumb-item"><a href="index.php">Trang chủ</a></li>
                 <li class="breadcrumb-item"><a href="bacsi.php">Bác sĩ</a></li>
@@ -525,6 +536,7 @@ function calculateAge($birth_year) {
                             <div class="tab-pane fade" id="articles" role="tabpanel" aria-labelledby="articles-tab">
                                 <h5 class="mb-4">Bài viết của bác sĩ</h5>
                                 
+
                                 <div class="row">
                                     <?php foreach($articles as $article): ?>
                                     <div class="col-md-6 mb-4">

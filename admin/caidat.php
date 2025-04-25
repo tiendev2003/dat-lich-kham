@@ -248,6 +248,30 @@ $groups = [
             border: 1px solid #ddd;
             vertical-align: middle;
         }
+        
+        .banner-settings-section {
+            border-top: 1px solid #eee;
+            margin-top: 20px;
+            padding-top: 20px;
+        }
+        
+        .banner-settings-title {
+            font-weight: 600;
+            margin-bottom: 15px;
+        }
+        
+        .overlay-preview {
+            width: 100%;
+            height: 80px;
+            margin-top: 10px;
+            background-image: url('../assets/img/sample-bg.jpg');
+            background-size: cover;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            text-shadow: 1px 1px 3px rgba(0,0,0,0.5);
+        }
     </style>
 </head>
 
@@ -402,6 +426,94 @@ $groups = [
                                                     <?php endif; ?>
                                                 </div>
                                             <?php endforeach; ?>
+                                            
+                                            <?php if($group_key === 'appearance'): ?>
+                                                <!-- Banner Settings Section -->
+                                                <div class="banner-settings-section">
+                                                    <h4 class="banner-settings-title">Cài đặt Banner Trang</h4>
+                                                    
+                                                    <!-- Banner Background Image -->
+                                                    <div class="setting-item">
+                                                        <div class="mb-3">
+                                                            <label for="page_banner_bg" class="form-label">Hình nền Banner</label>
+                                                            <input type="file" 
+                                                                   class="form-control" 
+                                                                   id="page_banner_bg" 
+                                                                   name="page_banner_bg"
+                                                                   accept="image/*">
+                                                            <div class="form-text">Ảnh nền được sử dụng cho banner đầu các trang</div>
+                                                            
+                                                            <?php 
+                                                            $banner_bg_query = $conn->query("SELECT ten_value FROM caidat_website WHERE ten_key = 'page_banner_bg'");
+                                                            $banner_bg = $banner_bg_query->fetch_assoc()['ten_value'] ?? '';
+                                                            if (!empty($banner_bg)): 
+                                                            ?>
+                                                                <div class="mt-2">
+                                                                    <p>Hiện tại:</p>
+                                                                    <img src="../<?php echo $banner_bg; ?>" 
+                                                                         alt="Banner Background" 
+                                                                         class="image-preview">
+                                                                    <input type="hidden" 
+                                                                           name="page_banner_bg_current" 
+                                                                           value="<?php echo htmlspecialchars($banner_bg); ?>">
+                                                                </div>
+                                                            <?php endif; ?>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Banner Overlay Color -->
+                                                    <div class="setting-item">
+                                                        <div class="mb-3">
+                                                            <label for="page_banner_overlay" class="form-label">Màu overlay Banner</label>
+                                                            <input type="text" 
+                                                                   class="form-control" 
+                                                                   id="page_banner_overlay" 
+                                                                   name="page_banner_overlay"
+                                                                   value="<?php 
+                                                                    $overlay_query = $conn->query("SELECT ten_value FROM caidat_website WHERE ten_key = 'page_banner_overlay'");
+                                                                    echo htmlspecialchars($overlay_query->fetch_assoc()['ten_value'] ?? 'rgba(0, 0, 0, 0.6)');
+                                                                   ?>"
+                                                                   placeholder="rgba(0, 0, 0, 0.6)">
+                                                            <div class="form-text">Định dạng RGBA với độ trong suốt (VD: rgba(0, 0, 0, 0.6))</div>
+                                                            <div class="overlay-preview" id="overlay_preview">Xem trước lớp phủ</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Banner Height -->
+                                                    <div class="setting-item">
+                                                        <div class="mb-3">
+                                                            <label for="page_banner_height" class="form-label">Chiều cao Banner</label>
+                                                            <input type="text" 
+                                                                   class="form-control" 
+                                                                   id="page_banner_height" 
+                                                                   name="page_banner_height"
+                                                                   value="<?php 
+                                                                    $height_query = $conn->query("SELECT ten_value FROM caidat_website WHERE ten_key = 'page_banner_height'");
+                                                                    echo htmlspecialchars($height_query->fetch_assoc()['ten_value'] ?? '200px');
+                                                                   ?>"
+                                                                   placeholder="200px">
+                                                            <div class="form-text">Chiều cao của banner (VD: 200px, 15rem, 30vh)</div>
+                                                        </div>
+                                                    </div>
+                                                    
+                                                    <!-- Banner Padding -->
+                                                    <div class="setting-item">
+                                                        <div class="mb-3">
+                                                            <label for="page_banner_padding" class="form-label">Padding Banner</label>
+                                                            <input type="text" 
+                                                                   class="form-control" 
+                                                                   id="page_banner_padding" 
+                                                                   name="page_banner_padding"
+                                                                   value="<?php 
+                                                                    $padding_query = $conn->query("SELECT ten_value FROM caidat_website WHERE ten_key = 'page_banner_padding'");
+                                                                    echo htmlspecialchars($padding_query->fetch_assoc()['ten_value'] ?? '50px 0');
+                                                                   ?>"
+                                                                   placeholder="50px 0">
+                                                            <div class="form-text">Khoảng cách đệm trong banner (VD: 50px 0, 2rem 1rem)</div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            <?php endif; ?>
                                         </div>
                                     </div>
                                     <?php $active = false; ?>
@@ -464,6 +576,20 @@ $groups = [
                     }
                 });
             });
+
+            // Banner overlay preview
+            const overlayInput = document.getElementById('page_banner_overlay');
+            const overlayPreview = document.getElementById('overlay_preview');
+            
+            if (overlayInput && overlayPreview) {
+                // Initial preview
+                overlayPreview.style.backgroundColor = overlayInput.value;
+                
+                // Update on change
+                overlayInput.addEventListener('input', function() {
+                    overlayPreview.style.backgroundColor = this.value;
+                });
+            }
         });
     </script>
 </body>

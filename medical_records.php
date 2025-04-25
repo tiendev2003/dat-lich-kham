@@ -19,7 +19,8 @@ if (!$patient) {
     exit;
 }
 
-$page_title = "Hồ sơ y tế";
+// Thiết lập tiêu đề trang cho head.php
+$GLOBALS['page_title'] = "Hồ sơ y tế";
 
 // Pagination settings
 $records_per_page = 10;
@@ -132,32 +133,71 @@ function get_medications($conn, $lichhen_id)
 ?>
 <!DOCTYPE html>
 <html lang="vi">
-
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hồ sơ y tế - Hệ thống đặt lịch khám bệnh</title>
-    <link rel="stylesheet" href="assets/css/style.css">
-     <!-- Bootstrap CSS -->
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
-    <!-- Font Awesome -->
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <?php include 'includes/head.php'; ?>
     <link rel="stylesheet" href="assets/css/pages/medical_records.css">
+    <style>
+        .medical-record-card {
+            border: 1px solid #eaeaea;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+        }
+        
+        .medical-record-card:hover {
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        
+        .card-header {
+            background-color: #f8f9fa;
+            border-bottom: 1px solid #eaeaea;
+        }
+        
+        .badge {
+            padding: 6px 12px;
+            font-weight: 500;
+        }
+        
+        .table-sm {
+            font-size: 0.9rem;
+        }
+        
+        .fw-bold {
+            font-weight: 600;
+        }
+        
+        .pagination .page-link {
+            color: #0d6efd;
+        }
+        
+        .pagination .page-item.active .page-link {
+            background-color: #0d6efd;
+            border-color: #0d6efd;
+        }
+        
+        @media (max-width: 767.98px) {
+            .col-md-3 {
+                margin-bottom: 20px;
+            }
+        }
+    </style>
 </head>
 
 <body>
+    <!-- Header -->
     <?php include 'includes/header.php'; ?>
-
 
     <div class="container py-5">
         <div class="row">
-            <div class="col-md-3">
+            <!-- Sidebar -->
+            <div class="col-lg-3">
                 <?php include 'includes/user_sidebar.php'; ?>
             </div>
-            <div class="col-md-9">
+            
+            <!-- Main Content -->
+            <div class="col-lg-9">
                 <div class="card shadow-sm">
-                    <div class="card-header bg-primary text-white">
-                        <h4 class="mb-0">Hồ sơ y tế của tôi</h4>
+                    <div class="card-header bg-primary text-white d-flex justify-content-between align-items-center">
+                        <h4 class="mb-0"><i class="fas fa-file-medical me-2"></i>Hồ sơ y tế của tôi</h4>
                     </div>
                     <div class="card-body">
                         <!-- Search and Filter -->
@@ -266,7 +306,7 @@ function get_medications($conn, $lichhen_id)
                                                 </div>
                                             <?php endif; ?>
 
-                                            <div class="mt-3 text-end">
+                                        <div class="mt-3 text-end">
                                                 <a href="download_medical_record.php?id=<?php echo $record['id']; ?>"
                                                     class="btn btn-sm btn-primary">
                                                     <i class="fas fa-download me-1"></i> Tải xuống
@@ -366,6 +406,4 @@ function get_status_name($status)
             return 'Không xác định';
     }
 }
-
-require_once 'includes/footer.php';
 ?>
